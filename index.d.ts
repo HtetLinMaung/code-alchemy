@@ -16,7 +16,7 @@ export declare const brewAzureFuncFindOne: (Model: any, hooks?: FindHooks, messa
 interface UpdateHooks {
     beforeResponse?: (defaultBody: any) => any;
     beforeFind?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
-    beforeUpdate?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
+    beforeUpdate?: (data: any, ctx: Context, req: HttpRequest) => Promise<void> | void;
     afterUpdate?: (data: any, ctx: Context, req: HttpRequest) => Promise<void> | void;
     beforeQuery?: (options: any, context: Context, req: HttpRequest) => Promise<void> | void;
 }
@@ -24,7 +24,7 @@ export declare const brewAzureFuncUpdate: (Model: any, hooks?: UpdateHooks, mess
 interface DeleteHooks {
     beforeResponse?: (defaultBody: any) => any;
     beforeFind?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
-    beforeDelete?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
+    beforeDelete?: (data: any, ctx: Context, req: HttpRequest) => Promise<void> | void;
     afterDelete?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
     beforeQuery?: (options: any, context: Context, req: HttpRequest) => Promise<void> | void;
 }

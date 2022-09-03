@@ -226,7 +226,7 @@ const brewAzureFuncFindOne = (Model, hooks = {}, message = "Data not found!", co
 };
 exports.brewAzureFuncFindOne = brewAzureFuncFindOne;
 const brewAzureFuncUpdate = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
-    const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { }, beforeUpdate: (ctx, req) => { }, afterUpdate: (data, ctx, req) => { } }, hooks);
+    const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { }, beforeUpdate: (data, ctx, req) => { }, afterUpdate: (data, ctx, req) => { } }, hooks);
     return (context, req) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             context.log("HTTP trigger function processed a request.");
@@ -269,10 +269,10 @@ const brewAzureFuncUpdate = (Model, hooks = {}, message = "Data not found!", con
                 throw error;
             }
             if ((0, types_1.isAsyncFunction)(defaultHooks.beforeUpdate)) {
-                yield defaultHooks.beforeUpdate(context, req);
+                yield defaultHooks.beforeUpdate(data, context, req);
             }
             else {
-                defaultHooks.beforeUpdate(context, req);
+                defaultHooks.beforeUpdate(data, context, req);
             }
             for (const [k, v] of Object.entries(req.body)) {
                 data[k] = v;
@@ -299,7 +299,7 @@ const brewAzureFuncUpdate = (Model, hooks = {}, message = "Data not found!", con
 };
 exports.brewAzureFuncUpdate = brewAzureFuncUpdate;
 const brewAzureFuncDelete = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
-    const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { }, beforeDelete: (ctx, req) => { } }, hooks);
+    const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { }, beforeDelete: (data, ctx, req) => { } }, hooks);
     return (context, req) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             context.log("HTTP trigger function processed a request.");
@@ -342,10 +342,10 @@ const brewAzureFuncDelete = (Model, hooks = {}, message = "Data not found!", con
                 throw error;
             }
             if ((0, types_1.isAsyncFunction)(defaultHooks.beforeDelete)) {
-                yield defaultHooks.beforeDelete(context, req);
+                yield defaultHooks.beforeDelete(data, context, req);
             }
             else {
-                defaultHooks.beforeDelete(context, req);
+                defaultHooks.beforeDelete(data, context, req);
             }
             if (connector == "sequelize") {
                 yield data.destroy();

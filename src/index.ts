@@ -266,7 +266,11 @@ export const brewAzureFuncFindOne = (
 interface UpdateHooks {
   beforeResponse?: (defaultBody: any) => any;
   beforeFind?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
-  beforeUpdate?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
+  beforeUpdate?: (
+    data: any,
+    ctx: Context,
+    req: HttpRequest
+  ) => Promise<void> | void;
   afterUpdate?: (
     data: any,
     ctx: Context,
@@ -289,7 +293,7 @@ export const brewAzureFuncUpdate = (
     beforeFind: (ctx: Context, req: HttpRequest) => {},
     beforeResponse: (defaultBody: any) => defaultBody,
     beforeQuery: (defaultOptions: any, ctx: Context, req: HttpRequest) => {},
-    beforeUpdate: (ctx: Context, req: HttpRequest) => {},
+    beforeUpdate: (data: any, ctx: Context, req: HttpRequest) => {},
     afterUpdate: (data: any, ctx: Context, req: HttpRequest) => {},
     ...hooks,
   };
@@ -334,9 +338,9 @@ export const brewAzureFuncUpdate = (
       }
 
       if (isAsyncFunction(defaultHooks.beforeUpdate)) {
-        await defaultHooks.beforeUpdate(context, req);
+        await defaultHooks.beforeUpdate(data, context, req);
       } else {
-        defaultHooks.beforeUpdate(context, req);
+        defaultHooks.beforeUpdate(data, context, req);
       }
 
       for (const [k, v] of Object.entries(req.body)) {
@@ -366,7 +370,11 @@ export const brewAzureFuncUpdate = (
 interface DeleteHooks {
   beforeResponse?: (defaultBody: any) => any;
   beforeFind?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
-  beforeDelete?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
+  beforeDelete?: (
+    data: any,
+    ctx: Context,
+    req: HttpRequest
+  ) => Promise<void> | void;
   afterDelete?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
   beforeQuery?: (
     options: any,
@@ -385,7 +393,7 @@ export const brewAzureFuncDelete = (
     beforeFind: (ctx: Context, req: HttpRequest) => {},
     beforeResponse: (defaultBody: any) => defaultBody,
     beforeQuery: (defaultOptions: any, ctx: Context, req: HttpRequest) => {},
-    beforeDelete: (ctx: Context, req: HttpRequest) => {},
+    beforeDelete: (data: any, ctx: Context, req: HttpRequest) => {},
     ...hooks,
   };
   return async (context: Context, req: HttpRequest): Promise<void> => {
@@ -429,9 +437,9 @@ export const brewAzureFuncDelete = (
       }
 
       if (isAsyncFunction(defaultHooks.beforeDelete)) {
-        await defaultHooks.beforeDelete(context, req);
+        await defaultHooks.beforeDelete(data, context, req);
       } else {
-        defaultHooks.beforeDelete(context, req);
+        defaultHooks.beforeDelete(data, context, req);
       }
 
       if (connector == "sequelize") {
