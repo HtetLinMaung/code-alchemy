@@ -394,6 +394,7 @@ export const brewAzureFuncDelete = (
     beforeResponse: (defaultBody: any) => defaultBody,
     beforeQuery: (defaultOptions: any, ctx: Context, req: HttpRequest) => {},
     beforeDelete: (data: any, ctx: Context, req: HttpRequest) => {},
+    afterDelete: (ctx: Context, req: HttpRequest) => {},
     ...hooks,
   };
   return async (context: Context, req: HttpRequest): Promise<void> => {
