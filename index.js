@@ -299,7 +299,7 @@ const brewAzureFuncUpdate = (Model, hooks = {}, message = "Data not found!", con
 };
 exports.brewAzureFuncUpdate = brewAzureFuncUpdate;
 const brewAzureFuncDelete = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
-    const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { }, beforeDelete: (data, ctx, req) => { } }, hooks);
+    const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { }, beforeDelete: (data, ctx, req) => { }, afterDelete: (ctx, req) => { } }, hooks);
     return (context, req) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             context.log("HTTP trigger function processed a request.");

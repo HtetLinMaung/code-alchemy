@@ -79,6 +79,37 @@ interface FindHooks {
   ) => Promise<void> | void;
 }
 
+const queryToWhere = (
+  query: any,
+  connector = "sequelize",
+  sequelize: any = null,
+  searchColumns: string[] = []
+) => {
+  let where: any = null;
+  for (const [k, v] of Object.entries(query)) {
+    if (k == "search") {
+      if (connector == "sequelize" && sequelize) {
+        where = {
+          [sequelize.Op.or]: searchColumns.map((column) => ({
+            [column]: {
+              [sequelize.Op.like]: `%${v}%`,
+            },
+          })),
+        };
+      } else if (connector == "mongoose") {
+        where = {
+          $text: { $search: v },
+        };
+      }
+    } else if (!["page", "perpage"].includes(k)) {
+      if (!where) {
+        where = {};
+      }
+      where[k] = v;
+    }
+  }
+};
+
 export const brewAzureFuncFindAll = (
   Model: any,
   hooks: FindHooks = {},
@@ -103,23 +134,12 @@ export const brewAzureFuncFindAll = (
       let data: any[] = null;
       let total = 0;
 
-      const search = req.query.search;
-      let where = null;
-      if (search) {
-        if (connector == "sequelize" && sequelize) {
-          where = {
-            [sequelize.Op.or]: searchColumns.map((column) => ({
-              [column]: {
-                [sequelize.Op.like]: `%${search}%`,
-              },
-            })),
-          };
-        } else if (connector == "mongoose") {
-          where = {
-            $text: { $search: search },
-          };
-        }
-      }
+      const where = queryToWhere(
+        req.query,
+        connector,
+        sequelize,
+        searchColumns
+      );
 
       let options = null;
       if (connector == "sequelize") {
@@ -219,14 +239,15 @@ export const brewAzureFuncFindOne = (
       } else {
         defaultHooks.beforeFind(context, req);
       }
+      const where = queryToWhere(req.query, connector);
       let data = null;
       let options = null;
       if (connector == "sequelize") {
         options = {
-          where: {},
+          where,
         };
       } else if (connector == "mongoose") {
-        options = {};
+        options = where;
       }
 
       if (isAsyncFunction(defaultHooks.beforeQuery)) {
@@ -305,14 +326,15 @@ export const brewAzureFuncUpdate = (
       } else {
         defaultHooks.beforeFind(context, req);
       }
+      const where = queryToWhere(req.query, connector);
       let data = null;
       let options = null;
       if (connector == "sequelize") {
         options = {
-          where: {},
+          where,
         };
       } else if (connector == "mongoose") {
-        options = {};
+        options = where;
       }
 
       if (isAsyncFunction(defaultHooks.beforeQuery)) {
@@ -405,14 +427,15 @@ export const brewAzureFuncDelete = (
       } else {
         defaultHooks.beforeFind(context, req);
       }
+      const where = queryToWhere(req.query, connector);
       let data = null;
       let options = null;
       if (connector == "sequelize") {
         options = {
-          where: {},
+          where,
         };
       } else if (connector == "mongoose") {
-        options = {};
+        options = where;
       }
 
       if (isAsyncFunction(defaultHooks.beforeQuery)) {
