@@ -63,6 +63,34 @@ const brewAzureFuncCreate = (Model, hooks = {}, connector = "sequelize") => {
     });
 };
 exports.brewAzureFuncCreate = brewAzureFuncCreate;
+const queryToWhere = (query, connector = "sequelize", sequelize = null, searchColumns = []) => {
+    let where = null;
+    for (const [k, v] of Object.entries(query)) {
+        if (k == "search") {
+            if (connector == "sequelize" && sequelize) {
+                where = {
+                    [sequelize.Op.or]: searchColumns.map((column) => ({
+                        [column]: {
+                            [sequelize.Op.like]: `%${v}%`,
+                        },
+                    })),
+                };
+            }
+            else if (connector == "mongoose") {
+                where = {
+                    $text: { $search: v },
+                };
+            }
+        }
+        else if (!["page", "perpage"].includes(k)) {
+            if (!where) {
+                where = {};
+            }
+            where[k] = v;
+        }
+    }
+    return where;
+};
 const brewAzureFuncFindAll = (Model, hooks = {}, connector = "sequelize", sequelize = null, searchColumns = []) => {
     const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { } }, hooks);
     return (context, req) => __awaiter(void 0, void 0, void 0, function* () {
@@ -76,24 +104,7 @@ const brewAzureFuncFindAll = (Model, hooks = {}, connector = "sequelize", sequel
             }
             let data = null;
             let total = 0;
-            const search = req.query.search;
-            let where = null;
-            if (search) {
-                if (connector == "sequelize" && sequelize) {
-                    where = {
-                        [sequelize.Op.or]: searchColumns.map((column) => ({
-                            [column]: {
-                                [sequelize.Op.like]: `%${search}%`,
-                            },
-                        })),
-                    };
-                }
-                else if (connector == "mongoose") {
-                    where = {
-                        $text: { $search: search },
-                    };
-                }
-            }
+            const where = queryToWhere(req.query, connector, sequelize, searchColumns);
             let options = null;
             if (connector == "sequelize") {
                 options = {
@@ -179,15 +190,16 @@ const brewAzureFuncFindOne = (Model, hooks = {}, message = "Data not found!", co
             else {
                 defaultHooks.beforeFind(context, req);
             }
+            const where = queryToWhere(req.query, connector);
             let data = null;
             let options = null;
             if (connector == "sequelize") {
                 options = {
-                    where: {},
+                    where,
                 };
             }
             else if (connector == "mongoose") {
-                options = {};
+                options = where;
             }
             if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
                 yield defaultHooks.beforeQuery(options, context, req);
@@ -236,15 +248,16 @@ const brewAzureFuncUpdate = (Model, hooks = {}, message = "Data not found!", con
             else {
                 defaultHooks.beforeFind(context, req);
             }
+            const where = queryToWhere(req.query, connector);
             let data = null;
             let options = null;
             if (connector == "sequelize") {
                 options = {
-                    where: {},
+                    where,
                 };
             }
             else if (connector == "mongoose") {
-                options = {};
+                options = where;
             }
             if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
                 yield defaultHooks.beforeQuery(options, context, req);
@@ -309,15 +322,16 @@ const brewAzureFuncDelete = (Model, hooks = {}, message = "Data not found!", con
             else {
                 defaultHooks.beforeFind(context, req);
             }
+            const where = queryToWhere(req.query, connector);
             let data = null;
             let options = null;
             if (connector == "sequelize") {
                 options = {
-                    where: {},
+                    where,
                 };
             }
             else if (connector == "mongoose") {
-                options = {};
+                options = where;
             }
             if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
                 yield defaultHooks.beforeQuery(options, context, req);

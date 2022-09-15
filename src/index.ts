@@ -108,6 +108,7 @@ const queryToWhere = (
       where[k] = v;
     }
   }
+  return where;
 };
 
 export const brewAzureFuncFindAll = (
