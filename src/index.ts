@@ -14,6 +14,8 @@ export const responseAzureFuncError = (context: Context, err: any) => {
   log({
     appid: process.env.appid || "code-alchemy",
     name: context.executionContext.functionName || "",
+    useragent: err.useragent || "",
+    userid: err.userid || "",
     code: 500,
     level: "error",
     message: err.message,

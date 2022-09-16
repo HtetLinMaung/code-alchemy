@@ -8,10 +8,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.brewAzureFuncDelete = exports.brewAzureFuncUpdate = exports.brewAzureFuncFindOne = exports.brewAzureFuncFindAll = exports.brewAzureFuncCreate = exports.responseAzureFuncError = void 0;
+const axios_1 = __importDefault(require("axios"));
 const types_1 = require("util/types");
+const log = (data) => {
+    try {
+        axios_1.default.post(`${process.env.log_server}/logs`, data);
+    }
+    catch (err) {
+        console.error(err);
+    }
+};
 const responseAzureFuncError = (context, err) => {
+    log({
+        appid: process.env.appid || "code-alchemy",
+        name: context.executionContext.functionName || "",
+        code: 500,
+        level: "error",
+        message: err.message,
+        stack: err.stack,
+    });
     console.error(err);
     context.res = {
         status: err.status || 500,
