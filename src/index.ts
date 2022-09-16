@@ -1,7 +1,24 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
+import axios from "axios";
 import { isAsyncFunction } from "util/types";
 
+const log = (data) => {
+  try {
+    axios.post(`${process.env.log_server}/logs`, data);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 export const responseAzureFuncError = (context: Context, err: any) => {
+  log({
+    appid: process.env.appid || "code-alchemy",
+    name: context.executionContext.functionName || "",
+    code: 500,
+    level: "error",
+    message: err.message,
+    stack: err.stack,
+  });
   console.error(err);
   context.res = {
     status: err.status || 500,
