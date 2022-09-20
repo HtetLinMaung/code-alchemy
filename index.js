@@ -15,6 +15,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.brewAzureFuncDelete = exports.brewAzureFuncUpdate = exports.brewAzureFuncFindOne = exports.brewAzureFuncFindAll = exports.brewAzureFuncCreate = exports.responseAzureFuncError = void 0;
 const axios_1 = __importDefault(require("axios"));
 const types_1 = require("util/types");
+const isJson = (v) => {
+    try {
+        JSON.parse(v);
+        return true;
+    }
+    catch (err) {
+        return false;
+    }
+};
 const log = (data) => {
     try {
         axios_1.default.post(`${process.env.log_server}/logs`, data);
@@ -27,6 +36,8 @@ const responseAzureFuncError = (context, err) => {
     log({
         appid: process.env.appid || "code-alchemy",
         name: context.executionContext.functionName || "",
+        useragent: err.useragent || "",
+        userid: err.userid || "",
         code: 500,
         level: "error",
         message: err.message,
@@ -68,13 +79,16 @@ const brewAzureFuncCreate = (Model, hooks = {}, connector = "sequelize") => {
             else {
                 defaultHooks.afterCreate(data, context, req);
             }
+            const defaultBody = {
+                code: 201,
+                message: "Data created successful.",
+                data,
+            };
             context.res = {
                 status: 201,
-                body: defaultHooks.beforeResponse({
-                    code: 201,
-                    message: "Data created successful.",
-                    data,
-                }),
+                body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                    ? yield defaultHooks.beforeResponse(defaultBody)
+                    : defaultHooks.beforeResponse(defaultBody),
             };
         }
         catch (err) {
@@ -106,7 +120,7 @@ const queryToWhere = (query, connector = "sequelize", sequelize = null, searchCo
             if (!where) {
                 where = {};
             }
-            where[k] = v;
+            where[k] = isJson(v) ? JSON.parse(v) : v;
         }
     }
     return where;
@@ -188,9 +202,12 @@ const brewAzureFuncFindAll = (Model, hooks = {}, connector = "sequelize", sequel
                     total = data.length;
                 }
             }
+            const defaultBody = Object.assign({ code: 200, message: "Data fetched successful.", data,
+                total }, pagination);
             context.res = {
-                body: defaultHooks.beforeResponse(Object.assign({ code: 200, message: "Data fetched successful.", data,
-                    total }, pagination)),
+                body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                    ? yield defaultHooks.beforeResponse(defaultBody)
+                    : defaultHooks.beforeResponse(defaultBody),
             };
         }
         catch (err) {
@@ -243,12 +260,15 @@ const brewAzureFuncFindOne = (Model, hooks = {}, message = "Data not found!", co
                 };
                 throw error;
             }
+            const defaultBody = {
+                code: 200,
+                message: "Data fetched successful.",
+                data,
+            };
             context.res = {
-                body: defaultHooks.beforeResponse({
-                    code: 200,
-                    message: "Data fetched successful.",
-                    data,
-                }),
+                body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                    ? yield defaultHooks.beforeResponse(defaultBody)
+                    : defaultHooks.beforeResponse(defaultBody),
             };
         }
         catch (err) {
@@ -317,12 +337,15 @@ const brewAzureFuncUpdate = (Model, hooks = {}, message = "Data not found!", con
             else {
                 defaultHooks.afterUpdate(data, context, req);
             }
+            const defaultBody = {
+                code: 200,
+                message: "Data updated successful.",
+                data,
+            };
             context.res = {
-                body: defaultHooks.beforeResponse({
-                    code: 200,
-                    message: "Data updated successful.",
-                    data,
-                }),
+                body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                    ? yield defaultHooks.beforeResponse(defaultBody)
+                    : defaultHooks.beforeResponse(defaultBody),
             };
         }
         catch (err) {
@@ -393,11 +416,14 @@ const brewAzureFuncDelete = (Model, hooks = {}, message = "Data not found!", con
             else {
                 defaultHooks.afterDelete(context, req);
             }
+            const defaultBody = {
+                code: 204,
+                message: "Data deleted successful.",
+            };
             context.res = {
-                body: defaultHooks.beforeResponse({
-                    code: 204,
-                    message: "Data deleted successful.",
-                }),
+                body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                    ? yield defaultHooks.beforeResponse(defaultBody)
+                    : defaultHooks.beforeResponse(defaultBody),
             };
         }
         catch (err) {
