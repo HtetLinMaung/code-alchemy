@@ -177,8 +177,8 @@ export const brewAzureFuncCreate = (
     context.res = {
       status: 201,
       body: isAsyncFunction(defaultHooks.beforeResponse)
-        ? await defaultHooks.beforeResponse(defaultBody)
-        : defaultHooks.beforeResponse(defaultBody),
+        ? await defaultHooks.beforeResponse(defaultBody, context, req)
+        : defaultHooks.beforeResponse(defaultBody, context, req),
     };
   });
 };
@@ -215,7 +215,7 @@ export const brewCrudAzureFunc = (
       afterUpdate: (data: any, ctx: Context, req: HttpRequest) => {},
       beforeDelete: (data: any, ctx: Context, req: HttpRequest) => {},
       afterDelete: (ctx: Context, req: HttpRequest) => {},
-      beforeResponse: (defaultBody: DynamicObject) => defaultBody,
+      beforeResponse: (defaultBody, ctx, req) => defaultBody,
       ...(modelOptions.hooks || {}),
     };
 
@@ -256,8 +256,8 @@ export const brewCrudAzureFunc = (
       context.res = {
         status: 201,
         body: isAsyncFunction(defaultHooks.beforeResponse)
-          ? await defaultHooks.beforeResponse(defaultBody)
-          : defaultHooks.beforeResponse(defaultBody),
+          ? await defaultHooks.beforeResponse(defaultBody, context, req)
+          : defaultHooks.beforeResponse(defaultBody, context, req),
       };
     } else if (method == "get") {
       if (isAsyncFunction(defaultHooks.beforeFind)) {
@@ -310,8 +310,8 @@ export const brewCrudAzureFunc = (
         };
         context.res = {
           body: isAsyncFunction(defaultHooks.beforeResponse)
-            ? await defaultHooks.beforeResponse(defaultBody)
-            : defaultHooks.beforeResponse(defaultBody),
+            ? await defaultHooks.beforeResponse(defaultBody, context, req)
+            : defaultHooks.beforeResponse(defaultBody, context, req),
         };
       } else {
         let data = null;
@@ -396,8 +396,8 @@ export const brewCrudAzureFunc = (
         };
         context.res = {
           body: isAsyncFunction(defaultHooks.beforeResponse)
-            ? await defaultHooks.beforeResponse(defaultBody)
-            : defaultHooks.beforeResponse(defaultBody),
+            ? await defaultHooks.beforeResponse(defaultBody, context, req)
+            : defaultHooks.beforeResponse(defaultBody, context, req),
         };
       }
     } else if (method == "put") {
@@ -464,8 +464,8 @@ export const brewCrudAzureFunc = (
       };
       context.res = {
         body: isAsyncFunction(defaultHooks.beforeResponse)
-          ? await defaultHooks.beforeResponse(defaultBody)
-          : defaultHooks.beforeResponse(defaultBody),
+          ? await defaultHooks.beforeResponse(defaultBody, context, req)
+          : defaultHooks.beforeResponse(defaultBody, context, req),
       };
     } else if (method == "delete") {
       if (isAsyncFunction(defaultHooks.beforeFind)) {
@@ -530,8 +530,8 @@ export const brewCrudAzureFunc = (
       };
       context.res = {
         body: isAsyncFunction(defaultHooks.beforeResponse)
-          ? await defaultHooks.beforeResponse(defaultBody)
-          : defaultHooks.beforeResponse(defaultBody),
+          ? await defaultHooks.beforeResponse(defaultBody, context, req)
+          : defaultHooks.beforeResponse(defaultBody, context, req),
       };
     } else {
       const err: any = new Error("Url not found!");
@@ -554,7 +554,7 @@ export const brewAzureFuncFindAll = (
 ): AzureFunction => {
   const defaultHooks: FindHooks = {
     beforeFind: (ctx: Context, req: HttpRequest) => {},
-    beforeResponse: (defaultBody: DynamicObject) => defaultBody,
+    beforeResponse: (defaultBody, ctx, req) => defaultBody,
     beforeQuery: (
       defaultOptions: DynamicObject,
       ctx: Context,
@@ -644,8 +644,8 @@ export const brewAzureFuncFindAll = (
     };
     context.res = {
       body: isAsyncFunction(defaultHooks.beforeResponse)
-        ? await defaultHooks.beforeResponse(defaultBody)
-        : defaultHooks.beforeResponse(defaultBody),
+        ? await defaultHooks.beforeResponse(defaultBody, context, req)
+        : defaultHooks.beforeResponse(defaultBody, context, req),
     };
   });
 };
@@ -658,7 +658,7 @@ export const brewAzureFuncFindOne = (
 ): AzureFunction => {
   const defaultHooks: FindHooks = {
     beforeFind: (ctx: Context, req: HttpRequest) => {},
-    beforeResponse: (defaultBody: DynamicObject) => defaultBody,
+    beforeResponse: (defaultBody, ctx, req) => defaultBody,
     beforeQuery: (
       defaultOptions: DynamicObject,
       ctx: Context,
@@ -712,8 +712,8 @@ export const brewAzureFuncFindOne = (
     };
     context.res = {
       body: isAsyncFunction(defaultHooks.beforeResponse)
-        ? await defaultHooks.beforeResponse(defaultBody)
-        : defaultHooks.beforeResponse(defaultBody),
+        ? await defaultHooks.beforeResponse(defaultBody, context, req)
+        : defaultHooks.beforeResponse(defaultBody, context, req),
     };
   });
 };
@@ -726,7 +726,7 @@ export const brewAzureFuncUpdate = (
 ): AzureFunction => {
   const defaultHooks: UpdateHooks = {
     beforeFind: (ctx: Context, req: HttpRequest) => {},
-    beforeResponse: (defaultBody: DynamicObject) => defaultBody,
+    beforeResponse: (defaultBody, ctx, req) => defaultBody,
     beforeQuery: (
       defaultOptions: DynamicObject,
       ctx: Context,
@@ -800,8 +800,8 @@ export const brewAzureFuncUpdate = (
     };
     context.res = {
       body: isAsyncFunction(defaultHooks.beforeResponse)
-        ? await defaultHooks.beforeResponse(defaultBody)
-        : defaultHooks.beforeResponse(defaultBody),
+        ? await defaultHooks.beforeResponse(defaultBody, context, req)
+        : defaultHooks.beforeResponse(defaultBody, context, req),
     };
   });
 };
@@ -814,7 +814,7 @@ export const brewAzureFuncDelete = (
 ): AzureFunction => {
   const defaultHooks: DeleteHooks = {
     beforeFind: (ctx: Context, req: HttpRequest) => {},
-    beforeResponse: (defaultBody: DynamicObject) => defaultBody,
+    beforeResponse: (defaultBody, ctx, req) => defaultBody,
     beforeQuery: (
       defaultOptions: DynamicObject,
       ctx: Context,
@@ -887,8 +887,8 @@ export const brewAzureFuncDelete = (
     };
     context.res = {
       body: isAsyncFunction(defaultHooks.beforeResponse)
-        ? await defaultHooks.beforeResponse(defaultBody)
-        : defaultHooks.beforeResponse(defaultBody),
+        ? await defaultHooks.beforeResponse(defaultBody, context, req)
+        : defaultHooks.beforeResponse(defaultBody, context, req),
     };
   });
 };

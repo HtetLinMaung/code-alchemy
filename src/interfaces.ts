@@ -11,7 +11,11 @@ export interface CreateHooks {
     ctx: Context,
     req: HttpRequest
   ) => Promise<void> | void;
-  beforeResponse?: (defaultBody: DynamicObject) => DynamicObject;
+  beforeResponse?: (
+    defaultBody: DynamicObject,
+    ctx: Context,
+    req: HttpRequest
+  ) => DynamicObject;
 }
 
 export interface AzureFuncHooks {
@@ -44,7 +48,11 @@ export interface AzureFuncHooks {
     req: HttpRequest
   ) => Promise<void> | void;
   afterDelete?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
-  beforeResponse?: (defaultBody: DynamicObject) => DynamicObject;
+  beforeResponse?: (
+    defaultBody: DynamicObject,
+    ctx: Context,
+    req: HttpRequest
+  ) => DynamicObject;
 }
 
 export interface ParamsMap {
@@ -58,7 +66,11 @@ export interface ModelOptions {
 }
 
 export interface FindHooks {
-  beforeResponse?: (defaultBody: DynamicObject) => DynamicObject;
+  beforeResponse?: (
+    defaultBody: DynamicObject,
+    ctx: Context,
+    req: HttpRequest
+  ) => DynamicObject;
   beforeFind?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
   beforeQuery?: (
     options: DynamicObject,
@@ -68,7 +80,11 @@ export interface FindHooks {
 }
 
 export interface UpdateHooks {
-  beforeResponse?: (defaultBody: DynamicObject) => DynamicObject;
+  beforeResponse?: (
+    defaultBody: DynamicObject,
+    ctx: Context,
+    req: HttpRequest
+  ) => DynamicObject;
   beforeFind?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
   beforeUpdate?: (
     data: any,
@@ -88,7 +104,11 @@ export interface UpdateHooks {
 }
 
 export interface DeleteHooks {
-  beforeResponse?: (defaultBody: DynamicObject) => DynamicObject;
+  beforeResponse?: (
+    defaultBody: DynamicObject,
+    ctx: Context,
+    req: HttpRequest
+  ) => DynamicObject;
   beforeFind?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
   beforeDelete?: (
     data: any,

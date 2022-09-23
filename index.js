@@ -82,7 +82,7 @@ exports.responseLambdaFuncError = responseLambdaFuncError;
 const brewBlankExpressFunc = (cb) => {
     return (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            if ((0, types_1.isAsyncFunction)(cb)) {
+            if ((0, types_1.isAsyncFunction)(cb) || cb.toString().includes("__awaiter")) {
                 yield cb(req, res);
             }
             else {
@@ -98,7 +98,7 @@ exports.brewBlankExpressFunc = brewBlankExpressFunc;
 const brewBlankAzureFunc = (cb) => {
     return (context, req) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            if ((0, types_1.isAsyncFunction)(cb)) {
+            if ((0, types_1.isAsyncFunction)(cb) || cb.toString().includes("__awaiter")) {
                 yield cb(context, req);
             }
             else {
@@ -114,7 +114,7 @@ exports.brewBlankAzureFunc = brewBlankAzureFunc;
 const brewBlankLambdaFunc = (cb) => {
     return (event) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            if ((0, types_1.isAsyncFunction)(cb)) {
+            if ((0, types_1.isAsyncFunction)(cb) || cb.toString().includes("__awaiter")) {
                 return yield cb(event);
             }
             return cb(event);
