@@ -93,7 +93,7 @@ export const brewBlankExpressFunc = (
 ) => {
   return async (req: Request, res: Response) => {
     try {
-      if (isAsyncFunction(cb)) {
+      if (isAsyncFunction(cb) || cb.toString().includes("__awaiter")) {
         await cb(req, res);
       } else {
         cb(req, res);
@@ -109,7 +109,7 @@ export const brewBlankAzureFunc = (
 ) => {
   return async (context: Context, req: HttpRequest): Promise<void> => {
     try {
-      if (isAsyncFunction(cb)) {
+      if (isAsyncFunction(cb) || cb.toString().includes("__awaiter")) {
         await cb(context, req);
       } else {
         cb(context, req);
@@ -127,7 +127,7 @@ export const brewBlankLambdaFunc = (
     event: APIGatewayProxyEvent
   ): Promise<APIGatewayProxyResult> => {
     try {
-      if (isAsyncFunction(cb)) {
+      if (isAsyncFunction(cb) || cb.toString().includes("__awaiter")) {
         return await cb(event);
       }
       return cb(event);
