@@ -203,6 +203,8 @@ export const brewCrudAzureFunc = (
     const modelOptions = map[context.bindingData[matchKey]];
     const defaultHooks: AzureFuncHooks = {
       afterFunctionStart: (ctx: Context, req: HttpRequest) => {},
+      beforeCreate: (ctx: Context, req: HttpRequest) => {},
+      beforeFind: (ctx: Context, req: HttpRequest) => {},
       beforeQuery: (
         defaultOptions: DynamicObject,
         ctx: Context,
@@ -214,7 +216,7 @@ export const brewCrudAzureFunc = (
       beforeDelete: (data: any, ctx: Context, req: HttpRequest) => {},
       afterDelete: (ctx: Context, req: HttpRequest) => {},
       beforeResponse: (defaultBody: DynamicObject) => defaultBody,
-      ...(map.hooks || {}),
+      ...(modelOptions.hooks || {}),
     };
 
     if (isAsyncFunction(defaultHooks.afterFunctionStart)) {
@@ -227,6 +229,11 @@ export const brewCrudAzureFunc = (
 
     const method = req.method.toLowerCase();
     if (method == "post") {
+      if (isAsyncFunction(defaultHooks.beforeCreate)) {
+        await defaultHooks.beforeCreate(context, req);
+      } else {
+        defaultHooks.beforeCreate(context, req);
+      }
       let data: any = null;
       if (connector == "sequelize") {
         data = await Model.create(req.body);
@@ -253,6 +260,11 @@ export const brewCrudAzureFunc = (
           : defaultHooks.beforeResponse(defaultBody),
       };
     } else if (method == "get") {
+      if (isAsyncFunction(defaultHooks.beforeFind)) {
+        await defaultHooks.beforeFind(context, req);
+      } else {
+        defaultHooks.beforeFind(context, req);
+      }
       if (
         !("page" in req.query) &&
         !("perpage" in req.query) &&
@@ -389,6 +401,11 @@ export const brewCrudAzureFunc = (
         };
       }
     } else if (method == "put") {
+      if (isAsyncFunction(defaultHooks.beforeFind)) {
+        await defaultHooks.beforeFind(context, req);
+      } else {
+        defaultHooks.beforeFind(context, req);
+      }
       let where = queryToWhere(req.query, connector);
       let data = null;
       let options = null;
@@ -451,6 +468,11 @@ export const brewCrudAzureFunc = (
           : defaultHooks.beforeResponse(defaultBody),
       };
     } else if (method == "delete") {
+      if (isAsyncFunction(defaultHooks.beforeFind)) {
+        await defaultHooks.beforeFind(context, req);
+      } else {
+        defaultHooks.beforeFind(context, req);
+      }
       let where = queryToWhere(req.query, connector);
       let data = null;
       let options = null;

@@ -9,7 +9,9 @@ export interface CreateHooks {
 }
 export interface AzureFuncHooks {
     afterFunctionStart?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
+    beforeFind?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
     beforeQuery?: (options: DynamicObject, context: Context, req: HttpRequest) => Promise<void> | void;
+    beforeCreate?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
     afterCreate?: (data: any, ctx: Context, req: HttpRequest) => Promise<void> | void;
     beforeUpdate?: (data: any, ctx: Context, req: HttpRequest) => Promise<void> | void;
     afterUpdate?: (data: any, ctx: Context, req: HttpRequest) => Promise<void> | void;

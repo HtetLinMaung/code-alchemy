@@ -176,7 +176,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
             throw err;
         }
         const modelOptions = map[context.bindingData[matchKey]];
-        const defaultHooks = Object.assign({ afterFunctionStart: (ctx, req) => { }, beforeQuery: (defaultOptions, ctx, req) => { }, afterCreate: (data, ctx, req) => { }, beforeUpdate: (data, ctx, req) => { }, afterUpdate: (data, ctx, req) => { }, beforeDelete: (data, ctx, req) => { }, afterDelete: (ctx, req) => { }, beforeResponse: (defaultBody) => defaultBody }, (map.hooks || {}));
+        const defaultHooks = Object.assign({ afterFunctionStart: (ctx, req) => { }, beforeCreate: (ctx, req) => { }, beforeFind: (ctx, req) => { }, beforeQuery: (defaultOptions, ctx, req) => { }, afterCreate: (data, ctx, req) => { }, beforeUpdate: (data, ctx, req) => { }, afterUpdate: (data, ctx, req) => { }, beforeDelete: (data, ctx, req) => { }, afterDelete: (ctx, req) => { }, beforeResponse: (defaultBody) => defaultBody }, (modelOptions.hooks || {}));
         if ((0, types_1.isAsyncFunction)(defaultHooks.afterFunctionStart)) {
             yield defaultHooks.afterFunctionStart(context, req);
         }
@@ -186,6 +186,12 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
         const Model = modelOptions.model;
         const method = req.method.toLowerCase();
         if (method == "post") {
+            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeCreate)) {
+                yield defaultHooks.beforeCreate(context, req);
+            }
+            else {
+                defaultHooks.beforeCreate(context, req);
+            }
             let data = null;
             if (connector == "sequelize") {
                 data = yield Model.create(req.body);
@@ -213,6 +219,12 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
             };
         }
         else if (method == "get") {
+            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+                yield defaultHooks.beforeFind(context, req);
+            }
+            else {
+                defaultHooks.beforeFind(context, req);
+            }
             if (!("page" in req.query) &&
                 !("perpage" in req.query) &&
                 !("search" in req.query)) {
@@ -338,6 +350,12 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
             }
         }
         else if (method == "put") {
+            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+                yield defaultHooks.beforeFind(context, req);
+            }
+            else {
+                defaultHooks.beforeFind(context, req);
+            }
             let where = (0, query_to_where_1.default)(req.query, connector);
             let data = null;
             let options = null;
@@ -400,6 +418,12 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
             };
         }
         else if (method == "delete") {
+            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+                yield defaultHooks.beforeFind(context, req);
+            }
+            else {
+                defaultHooks.beforeFind(context, req);
+            }
             let where = (0, query_to_where_1.default)(req.query, connector);
             let data = null;
             let options = null;
