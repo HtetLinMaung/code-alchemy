@@ -47,7 +47,3 @@ export interface DeleteHooks {
     afterDelete?: (ctx: Context, req: HttpRequest) => Promise<void> | void;
     beforeQuery?: (options: DynamicObject, context: Context, req: HttpRequest) => Promise<void> | void;
 }
-export interface MongooseSchemaIndex {
-    fields: DynamicObject;
-    options: DynamicObject;
-}
