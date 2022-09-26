@@ -6,10 +6,10 @@ export declare const responseAzureFuncError: (context: Context, err: any) => voi
 export declare const responseExpressFuncError: (req: Request, res: Response, err: any) => void;
 export declare const responseLambdaFuncError: (event: APIGatewayProxyEvent, err: any) => APIGatewayProxyResult;
 export declare const brewBlankExpressFunc: (cb: (req: Request, res: Response) => void) => (req: Request, res: Response) => Promise<void>;
-export declare const brewBlankAzureFunc: (cb: (ctx: Context, req: HttpRequest) => void) => (context: Context, req: HttpRequest) => Promise<void>;
+export declare const brewBlankAzureFunc: (cb: (ctx: Context, req: HttpRequest) => void) => AzureFunction;
 export declare const brewBlankLambdaFunc: (cb: (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>) => (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
 export declare const brewAzureFuncCreate: (Model: any, hooks?: CreateHooks, connector?: string) => AzureFunction;
-export declare const brewCrudAzureFunc: (map: ParamsMap, connector?: string, sequelize?: any, matchKey?: string) => (context: Context, req: HttpRequest) => Promise<void>;
+export declare const brewCrudAzureFunc: (map: ParamsMap, connector?: string, sequelize?: any, matchKey?: string) => AzureFunction;
 export declare const brewAzureFuncFindAll: (Model: any, hooks?: FindHooks, connector?: string, sequelize?: any, searchColumns?: string[]) => AzureFunction;
 export declare const brewAzureFuncFindOne: (Model: any, hooks?: FindHooks, message?: string, connector?: string) => AzureFunction;
 export declare const brewAzureFuncUpdate: (Model: any, hooks?: UpdateHooks, message?: string, connector?: string) => AzureFunction;

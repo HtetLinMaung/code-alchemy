@@ -107,7 +107,7 @@ export const brewBlankExpressFunc = (
 export const brewBlankAzureFunc = (
   cb: (ctx: Context, req: HttpRequest) => void
 ) => {
-  return async (context: Context, req: HttpRequest): Promise<void> => {
+  return (async (context: Context, req: HttpRequest): Promise<void> => {
     try {
       if (isAsyncFunction(cb) || cb.toString().includes("__awaiter")) {
         await cb(context, req);
@@ -117,7 +117,7 @@ export const brewBlankAzureFunc = (
     } catch (err) {
       responseAzureFuncError(context, err);
     }
-  };
+  }) as AzureFunction;
 };
 
 export const brewBlankLambdaFunc = (

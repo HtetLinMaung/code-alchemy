@@ -23,7 +23,7 @@ const queryToWhere = (
           $text: { $search: v },
         };
       }
-    } else if (!["page", "perpage"].includes(k)) {
+    } else if (!["page", "perpage", "sort"].includes(k)) {
       if (!where) {
         where = {};
       }

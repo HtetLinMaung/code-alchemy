@@ -96,7 +96,7 @@ const brewBlankExpressFunc = (cb) => {
 };
 exports.brewBlankExpressFunc = brewBlankExpressFunc;
 const brewBlankAzureFunc = (cb) => {
-    return (context, req) => __awaiter(void 0, void 0, void 0, function* () {
+    return ((context, req) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             if ((0, types_1.isAsyncFunction)(cb) || cb.toString().includes("__awaiter")) {
                 yield cb(context, req);
@@ -108,7 +108,7 @@ const brewBlankAzureFunc = (cb) => {
         catch (err) {
             (0, exports.responseAzureFuncError)(context, err);
         }
-    });
+    }));
 };
 exports.brewBlankAzureFunc = brewBlankAzureFunc;
 const brewBlankLambdaFunc = (cb) => {
@@ -157,8 +157,8 @@ const brewAzureFuncCreate = (Model, hooks = {}, connector = "sequelize") => {
         context.res = {
             status: 201,
             body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
-                ? yield defaultHooks.beforeResponse(defaultBody)
-                : defaultHooks.beforeResponse(defaultBody),
+                ? yield defaultHooks.beforeResponse(defaultBody, context, req)
+                : defaultHooks.beforeResponse(defaultBody, context, req),
         };
     }));
 };
@@ -176,7 +176,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
             throw err;
         }
         const modelOptions = map[context.bindingData[matchKey]];
-        const defaultHooks = Object.assign({ afterFunctionStart: (ctx, req) => { }, beforeCreate: (ctx, req) => { }, beforeFind: (ctx, req) => { }, beforeQuery: (defaultOptions, ctx, req) => { }, afterCreate: (data, ctx, req) => { }, beforeUpdate: (data, ctx, req) => { }, afterUpdate: (data, ctx, req) => { }, beforeDelete: (data, ctx, req) => { }, afterDelete: (ctx, req) => { }, beforeResponse: (defaultBody) => defaultBody }, (modelOptions.hooks || {}));
+        const defaultHooks = Object.assign({ afterFunctionStart: (ctx, req) => { }, beforeCreate: (ctx, req) => { }, beforeFind: (ctx, req) => { }, beforeQuery: (defaultOptions, ctx, req) => { }, afterCreate: (data, ctx, req) => { }, beforeUpdate: (data, ctx, req) => { }, afterUpdate: (data, ctx, req) => { }, beforeDelete: (data, ctx, req) => { }, afterDelete: (ctx, req) => { }, beforeResponse: (defaultBody, ctx, req) => defaultBody }, (modelOptions.hooks || {}));
         if ((0, types_1.isAsyncFunction)(defaultHooks.afterFunctionStart)) {
             yield defaultHooks.afterFunctionStart(context, req);
         }
@@ -214,8 +214,8 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
             context.res = {
                 status: 201,
                 body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
-                    ? yield defaultHooks.beforeResponse(defaultBody)
-                    : defaultHooks.beforeResponse(defaultBody),
+                    ? yield defaultHooks.beforeResponse(defaultBody, context, req)
+                    : defaultHooks.beforeResponse(defaultBody, context, req),
             };
         }
         else if (method == "get") {
@@ -269,8 +269,8 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
                 };
                 context.res = {
                     body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
-                        ? yield defaultHooks.beforeResponse(defaultBody)
-                        : defaultHooks.beforeResponse(defaultBody),
+                        ? yield defaultHooks.beforeResponse(defaultBody, context, req)
+                        : defaultHooks.beforeResponse(defaultBody, context, req),
                 };
             }
             else {
@@ -344,8 +344,8 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
                     total }, pagination);
                 context.res = {
                     body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
-                        ? yield defaultHooks.beforeResponse(defaultBody)
-                        : defaultHooks.beforeResponse(defaultBody),
+                        ? yield defaultHooks.beforeResponse(defaultBody, context, req)
+                        : defaultHooks.beforeResponse(defaultBody, context, req),
                 };
             }
         }
@@ -413,8 +413,8 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
             };
             context.res = {
                 body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
-                    ? yield defaultHooks.beforeResponse(defaultBody)
-                    : defaultHooks.beforeResponse(defaultBody),
+                    ? yield defaultHooks.beforeResponse(defaultBody, context, req)
+                    : defaultHooks.beforeResponse(defaultBody, context, req),
             };
         }
         else if (method == "delete") {
@@ -482,8 +482,8 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
             };
             context.res = {
                 body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
-                    ? yield defaultHooks.beforeResponse(defaultBody)
-                    : defaultHooks.beforeResponse(defaultBody),
+                    ? yield defaultHooks.beforeResponse(defaultBody, context, req)
+                    : defaultHooks.beforeResponse(defaultBody, context, req),
             };
         }
         else {
@@ -499,7 +499,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
 };
 exports.brewCrudAzureFunc = brewCrudAzureFunc;
 const brewAzureFuncFindAll = (Model, hooks = {}, connector = "sequelize", sequelize = null, searchColumns = []) => {
-    const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { } }, hooks);
+    const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody, ctx, req) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { } }, hooks);
     return (0, exports.brewBlankAzureFunc)((context, req) => __awaiter(void 0, void 0, void 0, function* () {
         context.log("HTTP trigger function processed a request.");
         if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
@@ -576,14 +576,14 @@ const brewAzureFuncFindAll = (Model, hooks = {}, connector = "sequelize", sequel
             total }, pagination);
         context.res = {
             body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
-                ? yield defaultHooks.beforeResponse(defaultBody)
-                : defaultHooks.beforeResponse(defaultBody),
+                ? yield defaultHooks.beforeResponse(defaultBody, context, req)
+                : defaultHooks.beforeResponse(defaultBody, context, req),
         };
     }));
 };
 exports.brewAzureFuncFindAll = brewAzureFuncFindAll;
 const brewAzureFuncFindOne = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
-    const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { } }, hooks);
+    const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody, ctx, req) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { } }, hooks);
     return (0, exports.brewBlankAzureFunc)((context, req) => __awaiter(void 0, void 0, void 0, function* () {
         context.log("HTTP trigger function processed a request.");
         if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
@@ -632,14 +632,14 @@ const brewAzureFuncFindOne = (Model, hooks = {}, message = "Data not found!", co
         };
         context.res = {
             body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
-                ? yield defaultHooks.beforeResponse(defaultBody)
-                : defaultHooks.beforeResponse(defaultBody),
+                ? yield defaultHooks.beforeResponse(defaultBody, context, req)
+                : defaultHooks.beforeResponse(defaultBody, context, req),
         };
     }));
 };
 exports.brewAzureFuncFindOne = brewAzureFuncFindOne;
 const brewAzureFuncUpdate = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
-    const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { }, beforeUpdate: (data, ctx, req) => { }, afterUpdate: (data, ctx, req) => { } }, hooks);
+    const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody, ctx, req) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { }, beforeUpdate: (data, ctx, req) => { }, afterUpdate: (data, ctx, req) => { } }, hooks);
     return (0, exports.brewBlankAzureFunc)((context, req) => __awaiter(void 0, void 0, void 0, function* () {
         context.log("HTTP trigger function processed a request.");
         if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
@@ -704,14 +704,14 @@ const brewAzureFuncUpdate = (Model, hooks = {}, message = "Data not found!", con
         };
         context.res = {
             body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
-                ? yield defaultHooks.beforeResponse(defaultBody)
-                : defaultHooks.beforeResponse(defaultBody),
+                ? yield defaultHooks.beforeResponse(defaultBody, context, req)
+                : defaultHooks.beforeResponse(defaultBody, context, req),
         };
     }));
 };
 exports.brewAzureFuncUpdate = brewAzureFuncUpdate;
 const brewAzureFuncDelete = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
-    const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { }, beforeDelete: (data, ctx, req) => { }, afterDelete: (ctx, req) => { } }, hooks);
+    const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody, ctx, req) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { }, beforeDelete: (data, ctx, req) => { }, afterDelete: (ctx, req) => { } }, hooks);
     return (0, exports.brewBlankAzureFunc)((context, req) => __awaiter(void 0, void 0, void 0, function* () {
         context.log("HTTP trigger function processed a request.");
         if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
@@ -777,8 +777,8 @@ const brewAzureFuncDelete = (Model, hooks = {}, message = "Data not found!", con
         };
         context.res = {
             body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
-                ? yield defaultHooks.beforeResponse(defaultBody)
-                : defaultHooks.beforeResponse(defaultBody),
+                ? yield defaultHooks.beforeResponse(defaultBody, context, req)
+                : defaultHooks.beforeResponse(defaultBody, context, req),
         };
     }));
 };

@@ -122,3 +122,8 @@ export interface DeleteHooks {
     req: HttpRequest
   ) => Promise<void> | void;
 }
+
+export interface MongooseSchemaIndex {
+  fields: DynamicObject;
+  options: DynamicObject;
+}
