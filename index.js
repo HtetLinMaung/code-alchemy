@@ -1751,8 +1751,14 @@ const brewExpressFuncDelete = (Model, hooks = {}, message = "Data not found!", c
 };
 exports.brewExpressFuncDelete = brewExpressFuncDelete;
 const brewExpressFuncCreateOrFindAll = (Model, hooks = {}, connector = "sequelize", sequelize = null, searchColumns = []) => {
-    const defaultHooks = Object.assign({ beforeCreate: (req, res) => { }, afterCreate: (data, req, res) => { }, beforeResponse: (defaultBody) => defaultBody, beforeFind: (req, res) => { }, beforeQuery: (defaultOptions, req, res) => { } }, hooks);
+    const defaultHooks = Object.assign({ beforeCreate: (req, res) => { }, afterCreate: (data, req, res) => { }, beforeResponse: (defaultBody) => defaultBody, beforeFind: (req, res) => { }, beforeQuery: (defaultOptions, req, res) => { }, afterFunctionStart: (req, res) => { } }, hooks);
     return (0, exports.brewBlankExpressFunc)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        if ((0, types_1.isAsyncFunction)(defaultHooks.afterFunctionStart)) {
+            yield defaultHooks.afterFunctionStart(req, res);
+        }
+        else {
+            defaultHooks.afterFunctionStart(req, res);
+        }
         const method = req.method.toLowerCase();
         if (method == "get") {
             if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
@@ -1884,8 +1890,14 @@ const brewExpressFuncCreateOrFindAll = (Model, hooks = {}, connector = "sequeliz
 };
 exports.brewExpressFuncCreateOrFindAll = brewExpressFuncCreateOrFindAll;
 const brewExpressFuncFindOneOrUpdateOrDeleteByParam = (Model, hooks = {}, message = "Data not found!", paramKey = "", connector = "sequelize") => {
-    const defaultHooks = Object.assign({ beforeFind: (req, res) => { }, beforeResponse: (defaultBody, req, res) => defaultBody, beforeQuery: (defaultOptions, req, res) => { }, beforeUpdate: (data, req, res) => { }, afterUpdate: (data, req, res) => { }, beforeDelete: (data, req, res) => { }, afterDelete: (req, res) => { } }, hooks);
+    const defaultHooks = Object.assign({ beforeFind: (req, res) => { }, beforeResponse: (defaultBody, req, res) => defaultBody, beforeQuery: (defaultOptions, req, res) => { }, beforeUpdate: (data, req, res) => { }, afterUpdate: (data, req, res) => { }, beforeDelete: (data, req, res) => { }, afterDelete: (req, res) => { }, afterFunctionStart: (req, res) => { } }, hooks);
     return (0, exports.brewBlankExpressFunc)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        if ((0, types_1.isAsyncFunction)(defaultHooks.afterFunctionStart)) {
+            yield defaultHooks.afterFunctionStart(req, res);
+        }
+        else {
+            defaultHooks.afterFunctionStart(req, res);
+        }
         if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
             yield defaultHooks.beforeFind(req, res);
         }

@@ -2039,9 +2039,15 @@ export const brewExpressFuncCreateOrFindAll = (
     beforeResponse: (defaultBody) => defaultBody,
     beforeFind: (req, res) => {},
     beforeQuery: (defaultOptions, req, res) => {},
+    afterFunctionStart: (req, res) => {},
     ...hooks,
   };
   return brewBlankExpressFunc(async (req, res) => {
+    if (isAsyncFunction(defaultHooks.afterFunctionStart)) {
+      await defaultHooks.afterFunctionStart(req, res);
+    } else {
+      defaultHooks.afterFunctionStart(req, res);
+    }
     const method = req.method.toLowerCase();
     if (method == "get") {
       if (isAsyncFunction(defaultHooks.beforeFind)) {
@@ -2206,9 +2212,15 @@ export const brewExpressFuncFindOneOrUpdateOrDeleteByParam = (
     afterUpdate: (data, req, res) => {},
     beforeDelete: (data, req, res) => {},
     afterDelete: (req, res) => {},
+    afterFunctionStart: (req, res) => {},
     ...hooks,
   };
   return brewBlankExpressFunc(async (req, res) => {
+    if (isAsyncFunction(defaultHooks.afterFunctionStart)) {
+      await defaultHooks.afterFunctionStart(req, res);
+    } else {
+      defaultHooks.afterFunctionStart(req, res);
+    }
     if (isAsyncFunction(defaultHooks.beforeFind)) {
       await defaultHooks.beforeFind(req, res);
     } else {
