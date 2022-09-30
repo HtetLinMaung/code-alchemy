@@ -23,7 +23,7 @@ const queryToWhere = (query, connector = "sequelize", sequelize = null, searchCo
                 };
             }
         }
-        else if (!["page", "perpage", "sort"].includes(k)) {
+        else if (!["page", "perpage", "sort", "select", "projection"].includes(k)) {
             if (!where) {
                 where = {};
             }
