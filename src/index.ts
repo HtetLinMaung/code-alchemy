@@ -2025,3 +2025,327 @@ export const brewExpressFuncDelete = (
     );
   });
 };
+
+export const brewExpressFuncCreateOrFindAll = (
+  Model: any,
+  hooks: ExpressFuncHooks = {},
+  connector = "sequelize",
+  sequelize: any = null,
+  searchColumns: string[] = []
+) => {
+  const defaultHooks: ExpressFuncHooks = {
+    beforeCreate: (req, res) => {},
+    afterCreate: (data, req, res) => {},
+    beforeResponse: (defaultBody) => defaultBody,
+    beforeFind: (req, res) => {},
+    beforeQuery: (defaultOptions, req, res) => {},
+    ...hooks,
+  };
+  return brewBlankExpressFunc(async (req, res) => {
+    const method = req.method.toLowerCase();
+    if (method == "get") {
+      if (isAsyncFunction(defaultHooks.beforeFind)) {
+        await defaultHooks.beforeFind(req, res);
+      } else {
+        defaultHooks.beforeFind(req, res);
+      }
+      let data: any[] = null;
+      let total = 0;
+
+      const where = queryToWhere(
+        req.query,
+        connector,
+        sequelize,
+        searchColumns
+      );
+
+      let options = null;
+      if (connector == "sequelize") {
+        options = {
+          where,
+        };
+      } else if (connector == "mongoose") {
+        options = where;
+      }
+
+      if (isAsyncFunction(defaultHooks.beforeQuery)) {
+        await defaultHooks.beforeQuery(options, req, res);
+      } else {
+        defaultHooks.beforeQuery(options, req, res);
+      }
+      let pagination = {};
+      if ("page" in req.query && "perpage" in req.query) {
+        const page = parseInt(req.query.page as string);
+        const perpage = parseInt(req.query.perpage as string);
+        const offset = (page - 1) * perpage;
+
+        if (connector == "sequelize") {
+          options = {
+            ...options,
+            limit: perpage,
+            offset,
+          };
+          if ("projection" in req.query) {
+            options["attributes"] = isJson(req.query.projection)
+              ? JSON.parse(req.query.projection as string)
+              : req.query.projection;
+          }
+          if ("sort" in req.query) {
+            options["order"] = isJson(req.query.sort)
+              ? JSON.parse(req.query.sort as string)
+              : req.query.sort;
+          }
+          const { rows, count } = await Model.findAndCountAll(options);
+          data = rows;
+          total = count;
+        } else if (connector == "mongoose") {
+          let cursor = null;
+          if ("projection" in req.query) {
+            cursor = Model.find(
+              options,
+              isJson(req.query.projection)
+                ? JSON.parse(req.query.projection as string)
+                : req.query.projection
+            );
+          } else {
+            cursor = Model.find(options);
+          }
+          if ("sort" in req.query) {
+            cursor = cursor.sort(
+              isJson(req.query.sort)
+                ? JSON.parse(req.query.sort as string)
+                : req.query.sort
+            );
+          }
+          data = await cursor.skip(offset).limit(perpage);
+
+          total = await Model.countDocuments(options);
+        }
+        pagination = {
+          page,
+          perpage,
+          pagecounts: Math.ceil(total / perpage),
+        };
+      } else {
+        if (connector == "sequelize") {
+          const { rows, count } = await Model.findAndCountAll(options);
+          data = rows;
+          total = count;
+        } else if (connector == "mongoose") {
+          if ("$project" in options) {
+            const project = options.$project;
+            delete options.$project;
+            data = await Model.find(options, project);
+          } else {
+            data = await Model.find(options);
+          }
+          total = data.length;
+        }
+      }
+      const defaultBody = {
+        code: 200,
+        message: "Data fetched successful.",
+        data,
+        total,
+        ...pagination,
+      };
+
+      res.json(
+        isAsyncFunction(defaultHooks.beforeResponse)
+          ? await defaultHooks.beforeResponse(defaultBody, req, res)
+          : defaultHooks.beforeResponse(defaultBody, req, res)
+      );
+    } else if (method == "post") {
+      if (isAsyncFunction(defaultHooks.beforeCreate)) {
+        await defaultHooks.beforeCreate(req, res);
+      } else {
+        defaultHooks.beforeCreate(req, res);
+      }
+      let data = null;
+      if (connector == "sequelize") {
+        data = await Model.create(req.body);
+      } else if (connector == "mongoose") {
+        data = new Model(req.body);
+        await data.save();
+      }
+      if (isAsyncFunction(defaultHooks.afterCreate)) {
+        await defaultHooks.afterCreate(data, req, res);
+      } else {
+        defaultHooks.afterCreate(data, req, res);
+      }
+
+      const defaultBody = {
+        code: 201,
+        message: "Data created successful.",
+        data,
+      };
+
+      res
+        .status(201)
+        .json(
+          isAsyncFunction(defaultHooks.beforeResponse)
+            ? await defaultHooks.beforeResponse(defaultBody, req, res)
+            : defaultHooks.beforeResponse(defaultBody, req, res)
+        );
+    }
+  });
+};
+
+export const brewExpressFuncFindOneOrUpdateOrDeleteByParam = (
+  Model: any,
+  hooks: ExpressFuncHooks = {},
+  message = "Data not found!",
+  paramKey: string = "",
+  connector = "sequelize"
+) => {
+  const defaultHooks: ExpressFuncHooks = {
+    beforeFind: (req, res) => {},
+    beforeResponse: (defaultBody, req, res) => defaultBody,
+    beforeQuery: (defaultOptions, req, res) => {},
+    beforeUpdate: (data, req, res) => {},
+    afterUpdate: (data, req, res) => {},
+    beforeDelete: (data, req, res) => {},
+    afterDelete: (req, res) => {},
+    ...hooks,
+  };
+  return brewBlankExpressFunc(async (req, res) => {
+    if (isAsyncFunction(defaultHooks.beforeFind)) {
+      await defaultHooks.beforeFind(req, res);
+    } else {
+      defaultHooks.beforeFind(req, res);
+    }
+    let pk = connector == "sequelize" ? "id" : "_id";
+    if (paramKey) {
+      pk = paramKey;
+    }
+    const where = { [pk]: req.params[pk] };
+    let data = null;
+    let options = null;
+    if (connector == "sequelize") {
+      options = {
+        where,
+      };
+    } else if (connector == "mongoose") {
+      options = where;
+    }
+
+    if (isAsyncFunction(defaultHooks.beforeQuery)) {
+      await defaultHooks.beforeQuery(options, req, res);
+    } else {
+      defaultHooks.beforeQuery(options, req, res);
+    }
+    let cursor = null;
+    if (connector == "mongoose") {
+      if ("projection" in req.query) {
+        cursor = Model.findOne(
+          options,
+          isJson(req.query.projection)
+            ? JSON.parse(req.query.projection as string)
+            : req.query.projection
+        );
+      } else {
+        cursor = Model.findOne(options);
+      }
+      if ("sort" in req.query) {
+        cursor = cursor.sort(
+          isJson(req.query.sort)
+            ? JSON.parse(req.query.sort as string)
+            : req.query.sort
+        );
+      }
+    } else {
+      if ("projection" in req.query) {
+        options["attributes"] = isJson(req.query.projection)
+          ? JSON.parse(req.query.projection as string)
+          : req.query.projection;
+      }
+      if ("sort" in req.query) {
+        options["order"] = isJson(req.query.sort)
+          ? JSON.parse(req.query.sort as string)
+          : req.query.sort;
+      }
+      cursor = Model.findOne(options);
+    }
+    data = await cursor;
+
+    if (!data) {
+      const error: any = new Error(message);
+      error.body = {
+        code: 404,
+        message,
+      };
+      throw error;
+    }
+    const method = req.method.toLowerCase();
+    if (method == "get") {
+      const defaultBody = {
+        code: 200,
+        message: "Data fetched successful.",
+        data,
+      };
+
+      res.json(
+        isAsyncFunction(defaultHooks.beforeResponse)
+          ? await defaultHooks.beforeResponse(defaultBody, req, res)
+          : defaultHooks.beforeResponse(defaultBody, req, res)
+      );
+    } else if (method == "put" || method == "patch") {
+      if (isAsyncFunction(defaultHooks.beforeUpdate)) {
+        await defaultHooks.beforeUpdate(data, req, res);
+      } else {
+        defaultHooks.beforeUpdate(data, req, res);
+      }
+
+      for (const [k, v] of Object.entries(req.body)) {
+        data[k] = v;
+      }
+      await data.save();
+
+      if (isAsyncFunction(defaultHooks.afterUpdate)) {
+        await defaultHooks.afterUpdate(data, req, res);
+      } else {
+        defaultHooks.afterUpdate(data, req, res);
+      }
+
+      const defaultBody = {
+        code: 200,
+        message: "Data updated successful.",
+        data,
+      };
+
+      res.json(
+        isAsyncFunction(defaultHooks.beforeResponse)
+          ? await defaultHooks.beforeResponse(defaultBody, req, res)
+          : defaultHooks.beforeResponse(defaultBody, req, res)
+      );
+    } else if (method == "delete") {
+      if (isAsyncFunction(defaultHooks.beforeDelete)) {
+        await defaultHooks.beforeDelete(data, req, res);
+      } else {
+        defaultHooks.beforeDelete(data, req, res);
+      }
+
+      if (connector == "sequelize") {
+        await data.destroy();
+      } else if (connector == "mongoose") {
+        await data.remove();
+      }
+      if (isAsyncFunction(defaultHooks.afterDelete)) {
+        await defaultHooks.afterDelete(req, res);
+      } else {
+        defaultHooks.afterDelete(req, res);
+      }
+
+      const defaultBody = {
+        code: 204,
+        message: "Data deleted successful.",
+      };
+
+      res.json(
+        isAsyncFunction(defaultHooks.beforeResponse)
+          ? await defaultHooks.beforeResponse(defaultBody, req, res)
+          : defaultHooks.beforeResponse(defaultBody, req, res)
+      );
+    }
+  });
+};
