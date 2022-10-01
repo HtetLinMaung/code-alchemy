@@ -5,5 +5,6 @@ declare const _default: {
     put: (url: string, data?: any, config?: AxiosRequestConfig<any>) => Promise<any[]>;
     patch: (url: string, data?: any, config?: AxiosRequestConfig<any>) => Promise<any[]>;
     delete: (url: string, config?: AxiosRequestConfig<any>) => Promise<any[]>;
+    download: (src: string, dest: string) => Promise<void>;
 };
 export default _default;

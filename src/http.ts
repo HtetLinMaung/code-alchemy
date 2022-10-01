@@ -1,4 +1,9 @@
+import * as stream from "stream";
+import { promisify } from "util";
 import axios, { AxiosRequestConfig } from "axios";
+import fs from "fs";
+
+const finished = promisify(stream.finished);
 
 export default {
   get: async (url: string, config?: AxiosRequestConfig<any>) => {
@@ -55,5 +60,15 @@ export default {
       }
       return [null, err];
     }
+  },
+  download: async (src: string, dest: string) => {
+    const writer = fs.createWriteStream(dest);
+    const response = await axios({
+      url: src,
+      method: "get",
+      responseType: "stream",
+    });
+    response.data.pipe(writer);
+    return finished(writer);
   },
 };

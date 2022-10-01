@@ -9,7 +9,7 @@ const queryToWhere = (
 ) => {
   let where: DynamicObject = null;
   for (const [k, v] of Object.entries(query)) {
-    if (k == "search") {
+    if (k == "search" && v) {
       if (connector == "sequelize" && sequelize) {
         where = {
           [sequelize.Op.or]: searchColumns.map((column) => ({
@@ -24,7 +24,15 @@ const queryToWhere = (
         };
       }
     } else if (
-      !["page", "perpage", "sort", "select", "projection"].includes(k)
+      ![
+        "page",
+        "perpage",
+        "sort",
+        "select",
+        "projection",
+        "group",
+        "search",
+      ].includes(k)
     ) {
       if (!where) {
         where = {};

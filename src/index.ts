@@ -336,7 +336,7 @@ export const brewCrudAzureFunc = (
         }
         let cursor = null;
         if (connector == "mongoose") {
-          if ("projection" in req.query) {
+          if ("projection" in req.query && req.query.projection) {
             cursor = Model.findOne(
               options,
               isJson(req.query.projection)
@@ -346,7 +346,7 @@ export const brewCrudAzureFunc = (
           } else {
             cursor = Model.findOne(options);
           }
-          if ("sort" in req.query) {
+          if ("sort" in req.query && req.query.sort) {
             cursor = cursor.sort(
               isJson(req.query.sort)
                 ? JSON.parse(req.query.sort)
@@ -354,12 +354,12 @@ export const brewCrudAzureFunc = (
             );
           }
         } else {
-          if ("projection" in req.query) {
+          if ("projection" in req.query && req.query.projection) {
             options["attributes"] = isJson(req.query.projection)
               ? JSON.parse(req.query.projection)
               : req.query.projection;
           }
-          if ("sort" in req.query) {
+          if ("sort" in req.query && req.query.sort) {
             options["order"] = isJson(req.query.sort)
               ? JSON.parse(req.query.sort)
               : req.query.sort;
@@ -425,23 +425,27 @@ export const brewCrudAzureFunc = (
               offset,
             };
 
-            if ("projection" in req.query) {
+            if ("projection" in req.query && req.query.projection) {
               options["attributes"] = isJson(req.query.projection)
                 ? JSON.parse(req.query.projection)
                 : req.query.projection;
             }
-            if ("sort" in req.query) {
+            if ("sort" in req.query && req.query.sort) {
               options["order"] = isJson(req.query.sort)
                 ? JSON.parse(req.query.sort)
                 : req.query.sort;
             }
-
+            if ("group" in req.query && req.query.group) {
+              options["group"] = isJson(req.query.group)
+                ? JSON.parse(req.query.group)
+                : req.query.group;
+            }
             const { rows, count } = await Model.findAndCountAll(options);
             data = rows;
             total = count;
           } else if (connector == "mongoose") {
             let cursor = null;
-            if ("projection" in req.query) {
+            if ("projection" in req.query && req.query.projection) {
               cursor = Model.find(
                 options,
                 isJson(req.query.projection)
@@ -451,7 +455,7 @@ export const brewCrudAzureFunc = (
             } else {
               cursor = Model.find(options);
             }
-            if ("sort" in req.query) {
+            if ("sort" in req.query && req.query.sort) {
               cursor = cursor.sort(
                 isJson(req.query.sort)
                   ? JSON.parse(req.query.sort)
@@ -468,23 +472,27 @@ export const brewCrudAzureFunc = (
           };
         } else {
           if (connector == "sequelize") {
-            if ("projection" in req.query) {
+            if ("projection" in req.query && req.query.projection) {
               options["attributes"] = isJson(req.query.projection)
                 ? JSON.parse(req.query.projection)
                 : req.query.projection;
             }
-            if ("sort" in req.query) {
+            if ("sort" in req.query && req.query.sort) {
               options["order"] = isJson(req.query.sort)
                 ? JSON.parse(req.query.sort)
                 : req.query.sort;
             }
-
+            if ("group" in req.query && req.query.group) {
+              options["group"] = isJson(req.query.group)
+                ? JSON.parse(req.query.group)
+                : req.query.group;
+            }
             const { rows, count } = await Model.findAndCountAll(options);
             data = rows;
             total = count;
           } else if (connector == "mongoose") {
             let cursor = null;
-            if ("projection" in req.query) {
+            if ("projection" in req.query && req.query.projection) {
               cursor = Model.find(
                 options,
                 isJson(req.query.projection)
@@ -494,7 +502,7 @@ export const brewCrudAzureFunc = (
             } else {
               cursor = Model.find(options);
             }
-            if ("sort" in req.query) {
+            if ("sort" in req.query && req.query.sort) {
               cursor = cursor.sort(
                 isJson(req.query.sort)
                   ? JSON.parse(req.query.sort)
@@ -542,7 +550,7 @@ export const brewCrudAzureFunc = (
       }
       let cursor = null;
       if (connector == "mongoose") {
-        if ("projection" in req.query) {
+        if ("projection" in req.query && req.query.projection) {
           cursor = Model.findOne(
             options,
             isJson(req.query.projection)
@@ -552,18 +560,18 @@ export const brewCrudAzureFunc = (
         } else {
           cursor = Model.findOne(options);
         }
-        if ("sort" in req.query) {
+        if ("sort" in req.query && req.query.sort) {
           cursor = cursor.sort(
             isJson(req.query.sort) ? JSON.parse(req.query.sort) : req.query.sort
           );
         }
       } else {
-        if ("projection" in req.query) {
+        if ("projection" in req.query && req.query.projection) {
           options["attributes"] = isJson(req.query.projection)
             ? JSON.parse(req.query.projection)
             : req.query.projection;
         }
-        if ("sort" in req.query) {
+        if ("sort" in req.query && req.query.sort) {
           options["order"] = isJson(req.query.sort)
             ? JSON.parse(req.query.sort)
             : req.query.sort;
@@ -633,7 +641,7 @@ export const brewCrudAzureFunc = (
       }
       let cursor = null;
       if (connector == "mongoose") {
-        if ("projection" in req.query) {
+        if ("projection" in req.query && req.query.projection) {
           cursor = Model.findOne(
             options,
             isJson(req.query.projection)
@@ -643,18 +651,18 @@ export const brewCrudAzureFunc = (
         } else {
           cursor = Model.findOne(options);
         }
-        if ("sort" in req.query) {
+        if ("sort" in req.query && req.query.sort) {
           cursor = cursor.sort(
             isJson(req.query.sort) ? JSON.parse(req.query.sort) : req.query.sort
           );
         }
       } else {
-        if ("projection" in req.query) {
+        if ("projection" in req.query && req.query.projection) {
           options["attributes"] = isJson(req.query.projection)
             ? JSON.parse(req.query.projection)
             : req.query.projection;
         }
-        if ("sort" in req.query) {
+        if ("sort" in req.query && req.query.sort) {
           options["order"] = isJson(req.query.sort)
             ? JSON.parse(req.query.sort)
             : req.query.sort;
@@ -812,7 +820,7 @@ export const brewCrudExpressFunc = (
         }
         let cursor = null;
         if (connector == "mongoose") {
-          if ("projection" in req.query) {
+          if ("projection" in req.query && req.query.projection) {
             cursor = Model.findOne(
               options,
               isJson(req.query.projection)
@@ -822,7 +830,7 @@ export const brewCrudExpressFunc = (
           } else {
             cursor = Model.findOne(options);
           }
-          if ("sort" in req.query) {
+          if ("sort" in req.query && req.query.sort) {
             cursor = cursor.sort(
               isJson(req.query.sort)
                 ? JSON.parse(req.query.sort as string)
@@ -830,12 +838,12 @@ export const brewCrudExpressFunc = (
             );
           }
         } else {
-          if ("projection" in req.query) {
+          if ("projection" in req.query && req.query.projection) {
             options["attributes"] = isJson(req.query.projection)
               ? JSON.parse(req.query.projection as string)
               : req.query.projection;
           }
-          if ("sort" in req.query) {
+          if ("sort" in req.query && req.query.sort) {
             options["order"] = isJson(req.query.sort)
               ? JSON.parse(req.query.sort as string)
               : req.query.sort;
@@ -900,22 +908,27 @@ export const brewCrudExpressFunc = (
               limit: perpage,
               offset,
             };
-            if ("projection" in req.query) {
+            if ("projection" in req.query && req.query.projection) {
               options["attributes"] = isJson(req.query.projection)
                 ? JSON.parse(req.query.projection as string)
                 : req.query.projection;
             }
-            if ("sort" in req.query) {
+            if ("sort" in req.query && req.query.sort) {
               options["order"] = isJson(req.query.sort)
                 ? JSON.parse(req.query.sort as string)
                 : req.query.sort;
+            }
+            if ("group" in req.query && req.query.group) {
+              options["group"] = isJson(req.query.group)
+                ? JSON.parse(req.query.group as string)
+                : req.query.group;
             }
             const { rows, count } = await Model.findAndCountAll(options);
             data = rows;
             total = count;
           } else if (connector == "mongoose") {
             let cursor = null;
-            if ("projection" in req.query) {
+            if ("projection" in req.query && req.query.projection) {
               cursor = Model.find(
                 options,
                 isJson(req.query.projection)
@@ -925,7 +938,7 @@ export const brewCrudExpressFunc = (
             } else {
               cursor = Model.find(options);
             }
-            if ("sort" in req.query) {
+            if ("sort" in req.query && req.query.sort) {
               cursor = cursor.sort(
                 isJson(req.query.sort)
                   ? JSON.parse(req.query.sort as string)
@@ -943,17 +956,44 @@ export const brewCrudExpressFunc = (
           };
         } else {
           if (connector == "sequelize") {
+            if ("projection" in req.query && req.query.projection) {
+              options["attributes"] = isJson(req.query.projection)
+                ? JSON.parse(req.query.projection as string)
+                : req.query.projection;
+            }
+            if ("sort" in req.query && req.query.sort) {
+              options["order"] = isJson(req.query.sort)
+                ? JSON.parse(req.query.sort as string)
+                : req.query.sort;
+            }
+            if ("group" in req.query && req.query.group) {
+              options["group"] = isJson(req.query.group)
+                ? JSON.parse(req.query.group as string)
+                : req.query.group;
+            }
             const { rows, count } = await Model.findAndCountAll(options);
             data = rows;
             total = count;
           } else if (connector == "mongoose") {
-            if ("$project" in options) {
-              const project = options.$project;
-              delete options.$project;
-              data = await Model.find(options, project);
+            let cursor = null;
+            if ("projection" in req.query && req.query.projection) {
+              cursor = Model.find(
+                options,
+                isJson(req.query.projection)
+                  ? JSON.parse(req.query.projection as string)
+                  : req.query.projection
+              );
             } else {
-              data = await Model.find(options);
+              cursor = Model.find(options);
             }
+            if ("sort" in req.query && req.query.sort) {
+              cursor = cursor.sort(
+                isJson(req.query.sort)
+                  ? JSON.parse(req.query.sort as string)
+                  : req.query.sort
+              );
+            }
+            data = await cursor;
             total = data.length;
           }
         }
@@ -995,7 +1035,7 @@ export const brewCrudExpressFunc = (
       }
       let cursor = null;
       if (connector == "mongoose") {
-        if ("projection" in req.query) {
+        if ("projection" in req.query && req.query.projection) {
           cursor = Model.findOne(
             options,
             isJson(req.query.projection)
@@ -1005,7 +1045,7 @@ export const brewCrudExpressFunc = (
         } else {
           cursor = Model.findOne(options);
         }
-        if ("sort" in req.query) {
+        if ("sort" in req.query && req.query.sort) {
           cursor = cursor.sort(
             isJson(req.query.sort)
               ? JSON.parse(req.query.sort as string)
@@ -1013,12 +1053,12 @@ export const brewCrudExpressFunc = (
           );
         }
       } else {
-        if ("projection" in req.query) {
+        if ("projection" in req.query && req.query.projection) {
           options["attributes"] = isJson(req.query.projection)
             ? JSON.parse(req.query.projection as string)
             : req.query.projection;
         }
-        if ("sort" in req.query) {
+        if ("sort" in req.query && req.query.sort) {
           options["order"] = isJson(req.query.sort)
             ? JSON.parse(req.query.sort as string)
             : req.query.sort;
@@ -1089,7 +1129,7 @@ export const brewCrudExpressFunc = (
       }
       let cursor = null;
       if (connector == "mongoose") {
-        if ("projection" in req.query) {
+        if ("projection" in req.query && req.query.projection) {
           cursor = Model.findOne(
             options,
             isJson(req.query.projection)
@@ -1099,7 +1139,7 @@ export const brewCrudExpressFunc = (
         } else {
           cursor = Model.findOne(options);
         }
-        if ("sort" in req.query) {
+        if ("sort" in req.query && req.query.sort) {
           cursor = cursor.sort(
             isJson(req.query.sort)
               ? JSON.parse(req.query.sort as string)
@@ -1107,12 +1147,12 @@ export const brewCrudExpressFunc = (
           );
         }
       } else {
-        if ("projection" in req.query) {
+        if ("projection" in req.query && req.query.projection) {
           options["attributes"] = isJson(req.query.projection)
             ? JSON.parse(req.query.projection as string)
             : req.query.projection;
         }
-        if ("sort" in req.query) {
+        if ("sort" in req.query && req.query.sort) {
           options["order"] = isJson(req.query.sort)
             ? JSON.parse(req.query.sort as string)
             : req.query.sort;
@@ -1221,22 +1261,27 @@ export const brewAzureFuncFindAll = (
           limit: perpage,
           offset,
         };
-        if ("projection" in req.query) {
+        if ("projection" in req.query && req.query.projection) {
           options["attributes"] = isJson(req.query.projection)
             ? JSON.parse(req.query.projection)
             : req.query.projection;
         }
-        if ("sort" in req.query) {
+        if ("sort" in req.query && req.query.sort) {
           options["order"] = isJson(req.query.sort)
             ? JSON.parse(req.query.sort)
             : req.query.sort;
+        }
+        if ("group" in req.query && req.query.group) {
+          options["group"] = isJson(req.query.group)
+            ? JSON.parse(req.query.group)
+            : req.query.group;
         }
         const { rows, count } = await Model.findAndCountAll(options);
         data = rows;
         total = count;
       } else if (connector == "mongoose") {
         let cursor = null;
-        if ("projection" in req.query) {
+        if ("projection" in req.query && req.query.projection) {
           cursor = Model.find(
             options,
             isJson(req.query.projection)
@@ -1246,7 +1291,7 @@ export const brewAzureFuncFindAll = (
         } else {
           cursor = Model.find(options);
         }
-        if ("sort" in req.query) {
+        if ("sort" in req.query && req.query.sort) {
           cursor = cursor.sort(
             isJson(req.query.sort) ? JSON.parse(req.query.sort) : req.query.sort
           );
@@ -1262,17 +1307,42 @@ export const brewAzureFuncFindAll = (
       };
     } else {
       if (connector == "sequelize") {
+        if ("projection" in req.query && req.query.projection) {
+          options["attributes"] = isJson(req.query.projection)
+            ? JSON.parse(req.query.projection)
+            : req.query.projection;
+        }
+        if ("sort" in req.query && req.query.sort) {
+          options["order"] = isJson(req.query.sort)
+            ? JSON.parse(req.query.sort)
+            : req.query.sort;
+        }
+        if ("group" in req.query && req.query.group) {
+          options["group"] = isJson(req.query.group)
+            ? JSON.parse(req.query.group)
+            : req.query.group;
+        }
         const { rows, count } = await Model.findAndCountAll(options);
         data = rows;
         total = count;
       } else if (connector == "mongoose") {
-        if ("$project" in options) {
-          const project = options.$project;
-          delete options.$project;
-          data = await Model.find(options, project);
+        let cursor = null;
+        if ("projection" in req.query && req.query.projection) {
+          cursor = Model.find(
+            options,
+            isJson(req.query.projection)
+              ? JSON.parse(req.query.projection)
+              : req.query.projection
+          );
         } else {
-          data = await Model.find(options);
+          cursor = Model.find(options);
         }
+        if ("sort" in req.query && req.query.sort) {
+          cursor = cursor.sort(
+            isJson(req.query.sort) ? JSON.parse(req.query.sort) : req.query.sort
+          );
+        }
+        data = await cursor;
         total = data.length;
       }
     }
@@ -1341,22 +1411,27 @@ export const brewExpressFuncFindAll = (
           limit: perpage,
           offset,
         };
-        if ("projection" in req.query) {
+        if ("projection" in req.query && req.query.projection) {
           options["attributes"] = isJson(req.query.projection)
             ? JSON.parse(req.query.projection as string)
             : req.query.projection;
         }
-        if ("sort" in req.query) {
+        if ("sort" in req.query && req.query.sort) {
           options["order"] = isJson(req.query.sort)
             ? JSON.parse(req.query.sort as string)
             : req.query.sort;
+        }
+        if ("group" in req.query && req.query.group) {
+          options["group"] = isJson(req.query.group)
+            ? JSON.parse(req.query.group as string)
+            : req.query.group;
         }
         const { rows, count } = await Model.findAndCountAll(options);
         data = rows;
         total = count;
       } else if (connector == "mongoose") {
         let cursor = null;
-        if ("projection" in req.query) {
+        if ("projection" in req.query && req.query.projection) {
           cursor = Model.find(
             options,
             isJson(req.query.projection)
@@ -1366,7 +1441,7 @@ export const brewExpressFuncFindAll = (
         } else {
           cursor = Model.find(options);
         }
-        if ("sort" in req.query) {
+        if ("sort" in req.query && req.query.sort) {
           cursor = cursor.sort(
             isJson(req.query.sort)
               ? JSON.parse(req.query.sort as string)
@@ -1384,17 +1459,44 @@ export const brewExpressFuncFindAll = (
       };
     } else {
       if (connector == "sequelize") {
+        if ("projection" in req.query && req.query.projection) {
+          options["attributes"] = isJson(req.query.projection)
+            ? JSON.parse(req.query.projection as string)
+            : req.query.projection;
+        }
+        if ("sort" in req.query && req.query.sort) {
+          options["order"] = isJson(req.query.sort as string)
+            ? JSON.parse(req.query.sort as string)
+            : req.query.sort;
+        }
+        if ("group" in req.query && req.query.group) {
+          options["group"] = isJson(req.query.group)
+            ? JSON.parse(req.query.group as string)
+            : req.query.group;
+        }
         const { rows, count } = await Model.findAndCountAll(options);
         data = rows;
         total = count;
       } else if (connector == "mongoose") {
-        if ("$project" in options) {
-          const project = options.$project;
-          delete options.$project;
-          data = await Model.find(options, project);
+        let cursor = null;
+        if ("projection" in req.query && req.query.projection) {
+          cursor = Model.find(
+            options,
+            isJson(req.query.projection)
+              ? JSON.parse(req.query.projection as string)
+              : req.query.projection
+          );
         } else {
-          data = await Model.find(options);
+          cursor = Model.find(options);
         }
+        if ("sort" in req.query && req.query.sort) {
+          cursor = cursor.sort(
+            isJson(req.query.sort)
+              ? JSON.parse(req.query.sort as string)
+              : req.query.sort
+          );
+        }
+        data = await cursor;
         total = data.length;
       }
     }
@@ -1451,7 +1553,7 @@ export const brewAzureFuncFindOne = (
     }
     let cursor = null;
     if (connector == "mongoose") {
-      if ("projection" in req.query) {
+      if ("projection" in req.query && req.query.projection) {
         cursor = Model.findOne(
           options,
           isJson(req.query.projection)
@@ -1461,18 +1563,18 @@ export const brewAzureFuncFindOne = (
       } else {
         cursor = Model.findOne(options);
       }
-      if ("sort" in req.query) {
+      if ("sort" in req.query && req.query.sort) {
         cursor = cursor.sort(
           isJson(req.query.sort) ? JSON.parse(req.query.sort) : req.query.sort
         );
       }
     } else {
-      if ("projection" in req.query) {
+      if ("projection" in req.query && req.query.projection) {
         options["attributes"] = isJson(req.query.projection)
           ? JSON.parse(req.query.projection)
           : req.query.projection;
       }
-      if ("sort" in req.query) {
+      if ("sort" in req.query && req.query.sort) {
         options["order"] = isJson(req.query.sort)
           ? JSON.parse(req.query.sort)
           : req.query.sort;
@@ -1538,7 +1640,7 @@ export const brewExpressFuncFindOne = (
     }
     let cursor = null;
     if (connector == "mongoose") {
-      if ("projection" in req.query) {
+      if ("projection" in req.query && req.query.projection) {
         cursor = Model.findOne(
           options,
           isJson(req.query.projection)
@@ -1548,7 +1650,7 @@ export const brewExpressFuncFindOne = (
       } else {
         cursor = Model.findOne(options);
       }
-      if ("sort" in req.query) {
+      if ("sort" in req.query && req.query.sort) {
         cursor = cursor.sort(
           isJson(req.query.sort)
             ? JSON.parse(req.query.sort as string)
@@ -1556,12 +1658,12 @@ export const brewExpressFuncFindOne = (
         );
       }
     } else {
-      if ("projection" in req.query) {
+      if ("projection" in req.query && req.query.projection) {
         options["attributes"] = isJson(req.query.projection)
           ? JSON.parse(req.query.projection as string)
           : req.query.projection;
       }
-      if ("sort" in req.query) {
+      if ("sort" in req.query && req.query.sort) {
         options["order"] = isJson(req.query.sort)
           ? JSON.parse(req.query.sort as string)
           : req.query.sort;
@@ -1631,7 +1733,7 @@ export const brewAzureFuncUpdate = (
     }
     let cursor = null;
     if (connector == "mongoose") {
-      if ("projection" in req.query) {
+      if ("projection" in req.query && req.query.projection) {
         cursor = Model.findOne(
           options,
           isJson(req.query.projection)
@@ -1641,18 +1743,18 @@ export const brewAzureFuncUpdate = (
       } else {
         cursor = Model.findOne(options);
       }
-      if ("sort" in req.query) {
+      if ("sort" in req.query && req.query.sort) {
         cursor = cursor.sort(
           isJson(req.query.sort) ? JSON.parse(req.query.sort) : req.query.sort
         );
       }
     } else {
-      if ("projection" in req.query) {
+      if ("projection" in req.query && req.query.projection) {
         options["attributes"] = isJson(req.query.projection)
           ? JSON.parse(req.query.projection)
           : req.query.projection;
       }
-      if ("sort" in req.query) {
+      if ("sort" in req.query && req.query.sort) {
         options["order"] = isJson(req.query.sort)
           ? JSON.parse(req.query.sort)
           : req.query.sort;
@@ -1738,7 +1840,7 @@ export const brewExpressFuncUpdate = (
     }
     let cursor = null;
     if (connector == "mongoose") {
-      if ("projection" in req.query) {
+      if ("projection" in req.query && req.query.projection) {
         cursor = Model.findOne(
           options,
           isJson(req.query.projection)
@@ -1748,7 +1850,7 @@ export const brewExpressFuncUpdate = (
       } else {
         cursor = Model.findOne(options);
       }
-      if ("sort" in req.query) {
+      if ("sort" in req.query && req.query.sort) {
         cursor = cursor.sort(
           isJson(req.query.sort)
             ? JSON.parse(req.query.sort as string)
@@ -1756,12 +1858,12 @@ export const brewExpressFuncUpdate = (
         );
       }
     } else {
-      if ("projection" in req.query) {
+      if ("projection" in req.query && req.query.projection) {
         options["attributes"] = isJson(req.query.projection)
           ? JSON.parse(req.query.projection as string)
           : req.query.projection;
       }
-      if ("sort" in req.query) {
+      if ("sort" in req.query && req.query.sort) {
         options["order"] = isJson(req.query.sort)
           ? JSON.parse(req.query.sort as string)
           : req.query.sort;
@@ -1849,7 +1951,7 @@ export const brewAzureFuncDelete = (
     }
     let cursor = null;
     if (connector == "mongoose") {
-      if ("projection" in req.query) {
+      if ("projection" in req.query && req.query.projection) {
         cursor = Model.findOne(
           options,
           isJson(req.query.projection)
@@ -1859,18 +1961,18 @@ export const brewAzureFuncDelete = (
       } else {
         cursor = Model.findOne(options);
       }
-      if ("sort" in req.query) {
+      if ("sort" in req.query && req.query.sort) {
         cursor = cursor.sort(
           isJson(req.query.sort) ? JSON.parse(req.query.sort) : req.query.sort
         );
       }
     } else {
-      if ("projection" in req.query) {
+      if ("projection" in req.query && req.query.projection) {
         options["attributes"] = isJson(req.query.projection)
           ? JSON.parse(req.query.projection)
           : req.query.projection;
       }
-      if ("sort" in req.query) {
+      if ("sort" in req.query && req.query.sort) {
         options["order"] = isJson(req.query.sort)
           ? JSON.parse(req.query.sort)
           : req.query.sort;
@@ -1955,7 +2057,7 @@ export const brewExpressFuncDelete = (
     }
     let cursor = null;
     if (connector == "mongoose") {
-      if ("projection" in req.query) {
+      if ("projection" in req.query && req.query.projection) {
         cursor = Model.findOne(
           options,
           isJson(req.query.projection)
@@ -1965,7 +2067,7 @@ export const brewExpressFuncDelete = (
       } else {
         cursor = Model.findOne(options);
       }
-      if ("sort" in req.query) {
+      if ("sort" in req.query && req.query.sort) {
         cursor = cursor.sort(
           isJson(req.query.sort)
             ? JSON.parse(req.query.sort as string)
@@ -1973,12 +2075,12 @@ export const brewExpressFuncDelete = (
         );
       }
     } else {
-      if ("projection" in req.query) {
+      if ("projection" in req.query && req.query.projection) {
         options["attributes"] = isJson(req.query.projection)
           ? JSON.parse(req.query.projection as string)
           : req.query.projection;
       }
-      if ("sort" in req.query) {
+      if ("sort" in req.query && req.query.sort) {
         options["order"] = isJson(req.query.sort)
           ? JSON.parse(req.query.sort as string)
           : req.query.sort;
@@ -2091,22 +2193,27 @@ export const brewExpressFuncCreateOrFindAll = (
             limit: perpage,
             offset,
           };
-          if ("projection" in req.query) {
+          if ("projection" in req.query && req.query.projection) {
             options["attributes"] = isJson(req.query.projection)
               ? JSON.parse(req.query.projection as string)
               : req.query.projection;
           }
-          if ("sort" in req.query) {
+          if ("sort" in req.query && req.query.sort) {
             options["order"] = isJson(req.query.sort)
               ? JSON.parse(req.query.sort as string)
               : req.query.sort;
+          }
+          if ("group" in req.query && req.query.group) {
+            options["group"] = isJson(req.query.group)
+              ? JSON.parse(req.query.group as string)
+              : req.query.group;
           }
           const { rows, count } = await Model.findAndCountAll(options);
           data = rows;
           total = count;
         } else if (connector == "mongoose") {
           let cursor = null;
-          if ("projection" in req.query) {
+          if ("projection" in req.query && req.query.projection) {
             cursor = Model.find(
               options,
               isJson(req.query.projection)
@@ -2116,7 +2223,7 @@ export const brewExpressFuncCreateOrFindAll = (
           } else {
             cursor = Model.find(options);
           }
-          if ("sort" in req.query) {
+          if ("sort" in req.query && req.query.sort) {
             cursor = cursor.sort(
               isJson(req.query.sort)
                 ? JSON.parse(req.query.sort as string)
@@ -2134,17 +2241,44 @@ export const brewExpressFuncCreateOrFindAll = (
         };
       } else {
         if (connector == "sequelize") {
+          if ("projection" in req.query && req.query.projection) {
+            options["attributes"] = isJson(req.query.projection)
+              ? JSON.parse(req.query.projection as string)
+              : req.query.projection;
+          }
+          if ("sort" in req.query && req.query.sort) {
+            options["order"] = isJson(req.query.sort as string)
+              ? JSON.parse(req.query.sort as string)
+              : req.query.sort;
+          }
+          if ("group" in req.query && req.query.group) {
+            options["group"] = isJson(req.query.group)
+              ? JSON.parse(req.query.group as string)
+              : req.query.group;
+          }
           const { rows, count } = await Model.findAndCountAll(options);
           data = rows;
           total = count;
         } else if (connector == "mongoose") {
-          if ("$project" in options) {
-            const project = options.$project;
-            delete options.$project;
-            data = await Model.find(options, project);
+          let cursor = null;
+          if ("projection" in req.query && req.query.projection) {
+            cursor = Model.find(
+              options,
+              isJson(req.query.projection)
+                ? JSON.parse(req.query.projection as string)
+                : req.query.projection
+            );
           } else {
-            data = await Model.find(options);
+            cursor = Model.find(options);
           }
+          if ("sort" in req.query && req.query.sort) {
+            cursor = cursor.sort(
+              isJson(req.query.sort)
+                ? JSON.parse(req.query.sort as string)
+                : req.query.sort
+            );
+          }
+          data = await cursor;
           total = data.length;
         }
       }
@@ -2248,7 +2382,7 @@ export const brewExpressFuncFindOneOrUpdateOrDeleteByParam = (
     }
     let cursor = null;
     if (connector == "mongoose") {
-      if ("projection" in req.query) {
+      if ("projection" in req.query && req.query.projection) {
         cursor = Model.findOne(
           options,
           isJson(req.query.projection)
@@ -2258,7 +2392,7 @@ export const brewExpressFuncFindOneOrUpdateOrDeleteByParam = (
       } else {
         cursor = Model.findOne(options);
       }
-      if ("sort" in req.query) {
+      if ("sort" in req.query && req.query.sort) {
         cursor = cursor.sort(
           isJson(req.query.sort)
             ? JSON.parse(req.query.sort as string)
@@ -2266,12 +2400,12 @@ export const brewExpressFuncFindOneOrUpdateOrDeleteByParam = (
         );
       }
     } else {
-      if ("projection" in req.query) {
+      if ("projection" in req.query && req.query.projection) {
         options["attributes"] = isJson(req.query.projection)
           ? JSON.parse(req.query.projection as string)
           : req.query.projection;
       }
-      if ("sort" in req.query) {
+      if ("sort" in req.query && req.query.sort) {
         options["order"] = isJson(req.query.sort)
           ? JSON.parse(req.query.sort as string)
           : req.query.sort;

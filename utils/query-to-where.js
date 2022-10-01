@@ -7,7 +7,7 @@ const is_json_1 = __importDefault(require("./is-json"));
 const queryToWhere = (query, connector = "sequelize", sequelize = null, searchColumns = []) => {
     let where = null;
     for (const [k, v] of Object.entries(query)) {
-        if (k == "search") {
+        if (k == "search" && v) {
             if (connector == "sequelize" && sequelize) {
                 where = {
                     [sequelize.Op.or]: searchColumns.map((column) => ({
@@ -23,7 +23,15 @@ const queryToWhere = (query, connector = "sequelize", sequelize = null, searchCo
                 };
             }
         }
-        else if (!["page", "perpage", "sort", "select", "projection"].includes(k)) {
+        else if (![
+            "page",
+            "perpage",
+            "sort",
+            "select",
+            "projection",
+            "group",
+            "search",
+        ].includes(k)) {
             if (!where) {
                 where = {};
             }
