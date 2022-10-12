@@ -15,7 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const log = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield axios_1.default.post(`${process.env.log_server}/logs`, data);
+        if (process.env.log_server) {
+            yield axios_1.default.post(`${process.env.log_server}/logs`, data);
+        }
     }
     catch (err) {
         console.error(err);
