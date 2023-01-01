@@ -2230,7 +2230,14 @@ export const brewExpressFuncCreateOrFindAll = (
                 : req.query.sort
             );
           }
-          data = await cursor.skip(offset).limit(perpage);
+          cursor = cursor.skip(offset).limit(perpage);
+          if ("populate" in req.query && req.query.populate) {
+            const populate = isJson(req.query.populate)
+              ? JSON.parse(req.query.populate as string)
+              : req.query.populate;
+            cursor = cursor.populate(populate);
+          }
+          data = await cursor.exec();
 
           total = await Model.countDocuments(options);
         }
