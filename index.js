@@ -1915,7 +1915,14 @@ const brewExpressFuncCreateOrFindAll = (Model, hooks = {}, connector = "sequeliz
                             ? JSON.parse(req.query.sort)
                             : req.query.sort);
                     }
-                    data = yield cursor.skip(offset).limit(perpage);
+                    cursor = cursor.skip(offset).limit(perpage);
+                    if ("populate" in req.query && req.query.populate) {
+                        const populate = (0, is_json_1.default)(req.query.populate)
+                            ? JSON.parse(req.query.populate)
+                            : req.query.populate;
+                        cursor = cursor.populate(populate);
+                    }
+                    data = yield cursor.exec();
                     total = yield Model.countDocuments(options);
                 }
                 pagination = {
