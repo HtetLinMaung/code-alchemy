@@ -12,11 +12,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.brewExpressFuncFindOneOrUpdateOrDeleteByParam = exports.brewExpressFuncCreateOrFindAll = exports.brewExpressFuncDelete = exports.brewAzureFuncDelete = exports.brewExpressFuncUpdate = exports.brewAzureFuncUpdate = exports.brewExpressFuncFindOne = exports.brewAzureFuncFindOne = exports.brewExpressFuncFindAll = exports.brewAzureFuncFindAll = exports.brewCrudExpressFunc = exports.brewCrudAzureFunc = exports.brewExpressFuncCreate = exports.brewAzureFuncCreate = exports.brewBlankLambdaFunc = exports.brewBlankAzureFunc = exports.brewBlankExpressFunc = exports.responseLambdaFuncError = exports.responseExpressFuncError = exports.responseAzureFuncError = void 0;
+exports.brewExpressFuncFindOneOrUpdateOrDeleteByParam = exports.brewExpressFuncCreateOrFindAll = exports.brewLambdaFuncDelete = exports.brewExpressFuncDelete = exports.brewAzureFuncDelete = exports.brewLambdaFuncUpdate = exports.brewExpressFuncUpdate = exports.brewAzureFuncUpdate = exports.brewLambdaFuncFindOne = exports.brewExpressFuncFindOne = exports.brewAzureFuncFindOne = exports.brewLambdaFuncFindAll = exports.brewExpressFuncFindAll = exports.brewAzureFuncFindAll = exports.brewCrudLambdaFunc = exports.brewCrudExpressFunc = exports.brewCrudAzureFunc = exports.brewLambdaFuncCreate = exports.brewExpressFuncCreate = exports.brewAzureFuncCreate = exports.brewBlankLambdaFunc = exports.brewBlankAzureFunc = exports.brewBlankExpressFunc = exports.responseLambdaFuncError = exports.responseExpressFuncError = exports.responseAzureFuncError = exports.createLambdaResponse = void 0;
 const types_1 = require("util/types");
 const is_json_1 = __importDefault(require("./utils/is-json"));
 const log_1 = __importDefault(require("./utils/log"));
 const query_to_where_1 = __importDefault(require("./utils/query-to-where"));
+const createLambdaResponse = (statusCode, body = {}, headers = {}) => {
+    return {
+        statusCode: statusCode,
+        headers: Object.assign({ "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "OPTIONS,POST,GET" }, headers),
+        body: JSON.stringify(body),
+    };
+};
+exports.createLambdaResponse = createLambdaResponse;
 const responseAzureFuncError = (context, err) => {
     (0, log_1.default)({
         appid: process.env.appid || "code-alchemy",
@@ -77,6 +85,11 @@ const responseLambdaFuncError = (event, err) => {
             message: err.message,
             stack: err.stack,
         }),
+        headers: {
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
+        },
     };
 };
 exports.responseLambdaFuncError = responseLambdaFuncError;
@@ -200,6 +213,40 @@ const brewExpressFuncCreate = (Model, hooks = {}, connector = "sequelize") => {
     }));
 };
 exports.brewExpressFuncCreate = brewExpressFuncCreate;
+const brewLambdaFuncCreate = (Model, hooks = {}, connector = "sequelize") => {
+    const defaultHooks = Object.assign({ beforeCreate: (event) => { }, afterCreate: (event) => { }, beforeResponse: (defaultBody, event) => defaultBody }, hooks);
+    return (0, exports.brewBlankLambdaFunc)((event) => __awaiter(void 0, void 0, void 0, function* () {
+        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeCreate)) {
+            yield defaultHooks.beforeCreate(event);
+        }
+        else {
+            defaultHooks.beforeCreate(event);
+        }
+        let data = null;
+        if (connector == "sequelize") {
+            data = yield Model.create(JSON.parse(event.body));
+        }
+        else if (connector == "mongoose") {
+            data = new Model(JSON.parse(event.body));
+            yield data.save();
+        }
+        if ((0, types_1.isAsyncFunction)(defaultHooks.afterCreate)) {
+            yield defaultHooks.afterCreate(data, event);
+        }
+        else {
+            defaultHooks.afterCreate(data, event);
+        }
+        const defaultBody = {
+            code: 201,
+            message: "Data created successful.",
+            data,
+        };
+        return (0, exports.createLambdaResponse)(201, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            ? yield defaultHooks.beforeResponse(defaultBody, event)
+            : defaultHooks.beforeResponse(defaultBody, event));
+    }));
+};
+exports.brewLambdaFuncCreate = brewLambdaFuncCreate;
 const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, matchKey = "model") => {
     return (0, exports.brewBlankAzureFunc)((context, req) => __awaiter(void 0, void 0, void 0, function* () {
         context.log("HTTP trigger function processed a request.");
@@ -1071,6 +1118,459 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
     }));
 };
 exports.brewCrudExpressFunc = brewCrudExpressFunc;
+const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matchKey = "model") => {
+    return (0, exports.brewBlankLambdaFunc)((event) => __awaiter(void 0, void 0, void 0, function* () {
+        if (!(event.pathParameters[matchKey] in map)) {
+            const err = new Error("Url not found!");
+            err.status = 404;
+            err.body = {
+                code: 404,
+                message: err.message,
+            };
+            throw err;
+        }
+        const modelOptions = map[event.pathParameters[matchKey]];
+        const defaultHooks = Object.assign({ afterFunctionStart: (event) => { }, beforeCreate: (event) => { }, beforeFind: (event) => { }, beforeQuery: (defaultOptions, event) => { }, afterCreate: (data, event) => { }, beforeUpdate: (data, event) => { }, afterUpdate: (data, event) => { }, beforeDelete: (data, event) => { }, afterDelete: (event) => { }, beforeResponse: (defaultBody, event) => defaultBody }, (modelOptions.hooks || {}));
+        if ((0, types_1.isAsyncFunction)(defaultHooks.afterFunctionStart)) {
+            yield defaultHooks.afterFunctionStart(event);
+        }
+        else {
+            defaultHooks.afterFunctionStart(event);
+        }
+        const Model = modelOptions.model;
+        const method = event.httpMethod.toLowerCase();
+        if (method == "post") {
+            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeCreate)) {
+                yield defaultHooks.beforeCreate(event);
+            }
+            else {
+                defaultHooks.beforeCreate(event);
+            }
+            let data = null;
+            if (connector == "sequelize") {
+                data = yield Model.create(JSON.parse(event.body));
+            }
+            else if (connector == "mongoose") {
+                data = new Model(JSON.parse(event.body));
+                yield data.save();
+            }
+            if ((0, types_1.isAsyncFunction)(defaultHooks.afterCreate)) {
+                yield defaultHooks.afterCreate(data, event);
+            }
+            else {
+                defaultHooks.afterCreate(data, event);
+            }
+            let defaultBody = {
+                code: 201,
+                message: "Data created successful.",
+                data,
+            };
+            return (0, exports.createLambdaResponse)(201, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                ? yield defaultHooks.beforeResponse(defaultBody, event)
+                : defaultHooks.beforeResponse(defaultBody, event));
+        }
+        else if (method == "get") {
+            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+                yield defaultHooks.beforeFind(event);
+            }
+            else {
+                defaultHooks.beforeFind(event);
+            }
+            if (!("page" in event.queryStringParameters) &&
+                !("perpage" in event.queryStringParameters) &&
+                !("search" in event.queryStringParameters)) {
+                let where = (0, query_to_where_1.default)(event.queryStringParameters, connector);
+                let data = null;
+                let options = null;
+                if (connector == "sequelize") {
+                    options = {
+                        where,
+                    };
+                }
+                else if (connector == "mongoose") {
+                    options = where;
+                }
+                if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+                    yield defaultHooks.beforeQuery(options, event);
+                }
+                else {
+                    defaultHooks.beforeQuery(options, event);
+                }
+                let cursor = null;
+                if (connector == "mongoose") {
+                    if ("projection" in event.queryStringParameters &&
+                        event.queryStringParameters.projection) {
+                        cursor = Model.findOne(options, (0, is_json_1.default)(event.queryStringParameters.projection)
+                            ? JSON.parse(event.queryStringParameters.projection)
+                            : event.queryStringParameters.projection);
+                    }
+                    else {
+                        cursor = Model.findOne(options);
+                    }
+                    if ("sort" in event.queryStringParameters &&
+                        event.queryStringParameters.sort) {
+                        cursor = cursor.sort((0, is_json_1.default)(event.queryStringParameters.sort)
+                            ? JSON.parse(event.queryStringParameters.sort)
+                            : event.queryStringParameters.sort);
+                    }
+                }
+                else {
+                    if ("projection" in event.queryStringParameters &&
+                        event.queryStringParameters.projection) {
+                        options["attributes"] = (0, is_json_1.default)(event.queryStringParameters.projection)
+                            ? JSON.parse(event.queryStringParameters.projection)
+                            : event.queryStringParameters.projection;
+                    }
+                    if ("sort" in event.queryStringParameters &&
+                        event.queryStringParameters.sort) {
+                        options["order"] = (0, is_json_1.default)(event.queryStringParameters.sort)
+                            ? JSON.parse(event.queryStringParameters.sort)
+                            : event.queryStringParameters.sort;
+                    }
+                    cursor = Model.findOne(options);
+                }
+                if (!data) {
+                    const message = modelOptions.message || "Data not found!";
+                    const error = new Error(message);
+                    error.body = {
+                        code: 404,
+                        message,
+                    };
+                    throw error;
+                }
+                const defaultBody = {
+                    code: 200,
+                    message: "Data fetched successful.",
+                    data,
+                };
+                return (0, exports.createLambdaResponse)(200, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                    ? yield defaultHooks.beforeResponse(defaultBody, event)
+                    : defaultHooks.beforeResponse(defaultBody, event));
+            }
+            else {
+                let data = null;
+                let total = 0;
+                let where = (0, query_to_where_1.default)(event.queryStringParameters, connector, sequelize, modelOptions.searchColumns || []);
+                let options = null;
+                if (connector == "sequelize") {
+                    options = {
+                        where,
+                    };
+                }
+                else if (connector == "mongoose") {
+                    options = where;
+                }
+                if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+                    yield defaultHooks.beforeQuery(options, event);
+                }
+                else {
+                    defaultHooks.beforeQuery(options, event);
+                }
+                let pagination = {};
+                if ("page" in event.queryStringParameters &&
+                    "perpage" in event.queryStringParameters) {
+                    const page = parseInt(event.queryStringParameters.page);
+                    const perpage = parseInt(event.queryStringParameters.perpage);
+                    const offset = (page - 1) * perpage;
+                    if (connector == "sequelize") {
+                        options = Object.assign(Object.assign({}, options), { limit: perpage, offset });
+                        if ("projection" in event.queryStringParameters &&
+                            event.queryStringParameters.projection) {
+                            options["attributes"] = (0, is_json_1.default)(event.queryStringParameters.projection)
+                                ? JSON.parse(event.queryStringParameters.projection)
+                                : event.queryStringParameters.projection;
+                        }
+                        if ("sort" in event.queryStringParameters &&
+                            event.queryStringParameters.sort) {
+                            options["order"] = (0, is_json_1.default)(event.queryStringParameters.sort)
+                                ? JSON.parse(event.queryStringParameters.sort)
+                                : event.queryStringParameters.sort;
+                        }
+                        if ("group" in event.queryStringParameters &&
+                            event.queryStringParameters.group) {
+                            options["group"] = (0, is_json_1.default)(event.queryStringParameters.group)
+                                ? JSON.parse(event.queryStringParameters.group)
+                                : event.queryStringParameters.group;
+                        }
+                        const { rows, count } = yield Model.findAndCountAll(options);
+                        data = rows;
+                        total = count;
+                    }
+                    else if (connector == "mongoose") {
+                        let cursor = null;
+                        if ("projection" in event.queryStringParameters &&
+                            event.queryStringParameters.projection) {
+                            cursor = Model.find(options, (0, is_json_1.default)(event.queryStringParameters.projection)
+                                ? JSON.parse(event.queryStringParameters.projection)
+                                : event.queryStringParameters.projection);
+                        }
+                        else {
+                            cursor = Model.find(options);
+                        }
+                        if ("sort" in event.queryStringParameters &&
+                            event.queryStringParameters.sort) {
+                            cursor = cursor.sort((0, is_json_1.default)(event.queryStringParameters.sort)
+                                ? JSON.parse(event.queryStringParameters.sort)
+                                : event.queryStringParameters.sort);
+                        }
+                        data = yield cursor.skip(offset).limit(perpage);
+                        total = yield Model.countDocuments(options);
+                    }
+                    pagination = {
+                        page,
+                        perpage,
+                        pagecounts: Math.ceil(total / perpage),
+                    };
+                }
+                else {
+                    if (connector == "sequelize") {
+                        if ("projection" in event.queryStringParameters &&
+                            event.queryStringParameters.projection) {
+                            options["attributes"] = (0, is_json_1.default)(event.queryStringParameters.projection)
+                                ? JSON.parse(event.queryStringParameters.projection)
+                                : event.queryStringParameters.projection;
+                        }
+                        if ("sort" in event.queryStringParameters &&
+                            event.queryStringParameters.sort) {
+                            options["order"] = (0, is_json_1.default)(event.queryStringParameters.sort)
+                                ? JSON.parse(event.queryStringParameters.sort)
+                                : event.queryStringParameters.sort;
+                        }
+                        if ("group" in event.queryStringParameters &&
+                            event.queryStringParameters.group) {
+                            options["group"] = (0, is_json_1.default)(event.queryStringParameters.group)
+                                ? JSON.parse(event.queryStringParameters.group)
+                                : event.queryStringParameters.group;
+                        }
+                        const { rows, count } = yield Model.findAndCountAll(options);
+                        data = rows;
+                        total = count;
+                    }
+                    else if (connector == "mongoose") {
+                        let cursor = null;
+                        if ("projection" in event.queryStringParameters &&
+                            event.queryStringParameters.projection) {
+                            cursor = Model.find(options, (0, is_json_1.default)(event.queryStringParameters.projection)
+                                ? JSON.parse(event.queryStringParameters.projection)
+                                : event.queryStringParameters.projection);
+                        }
+                        else {
+                            cursor = Model.find(options);
+                        }
+                        if ("sort" in event.queryStringParameters &&
+                            event.queryStringParameters.sort) {
+                            cursor = cursor.sort((0, is_json_1.default)(event.queryStringParameters.sort)
+                                ? JSON.parse(event.queryStringParameters.sort)
+                                : event.queryStringParameters.sort);
+                        }
+                        data = yield cursor;
+                        total = data.length;
+                    }
+                }
+                const defaultBody = Object.assign({ code: 200, message: "Data fetched successful.", data,
+                    total }, pagination);
+                return (0, exports.createLambdaResponse)(200, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                    ? yield defaultHooks.beforeResponse(defaultBody, event)
+                    : defaultHooks.beforeResponse(defaultBody, event));
+            }
+        }
+        else if (method == "put") {
+            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+                yield defaultHooks.beforeFind(event);
+            }
+            else {
+                defaultHooks.beforeFind(event);
+            }
+            let where = (0, query_to_where_1.default)(event.queryStringParameters, connector);
+            let data = null;
+            let options = null;
+            if (connector == "sequelize") {
+                options = {
+                    where,
+                };
+            }
+            else if (connector == "mongoose") {
+                options = where;
+            }
+            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+                yield defaultHooks.beforeQuery(options, event);
+            }
+            else {
+                defaultHooks.beforeQuery(options, event);
+            }
+            let cursor = null;
+            if (connector == "mongoose") {
+                if ("projection" in event.queryStringParameters &&
+                    event.queryStringParameters.projection) {
+                    cursor = Model.findOne(options, (0, is_json_1.default)(event.queryStringParameters.projection)
+                        ? JSON.parse(event.queryStringParameters.projection)
+                        : event.queryStringParameters.projection);
+                }
+                else {
+                    cursor = Model.findOne(options);
+                }
+                if ("sort" in event.queryStringParameters &&
+                    event.queryStringParameters.sort) {
+                    cursor = cursor.sort((0, is_json_1.default)(event.queryStringParameters.sort)
+                        ? JSON.parse(event.queryStringParameters.sort)
+                        : event.queryStringParameters.sort);
+                }
+            }
+            else {
+                if ("projection" in event.queryStringParameters &&
+                    event.queryStringParameters.projection) {
+                    options["attributes"] = (0, is_json_1.default)(event.queryStringParameters.projection)
+                        ? JSON.parse(event.queryStringParameters.projection)
+                        : event.queryStringParameters.projection;
+                }
+                if ("sort" in event.queryStringParameters &&
+                    event.queryStringParameters.sort) {
+                    options["order"] = (0, is_json_1.default)(event.queryStringParameters.sort)
+                        ? JSON.parse(event.queryStringParameters.sort)
+                        : event.queryStringParameters.sort;
+                }
+                cursor = Model.findOne(options);
+            }
+            data = yield cursor;
+            if (!data) {
+                const message = modelOptions.message || "Data not found!";
+                const error = new Error(message);
+                error.body = {
+                    code: 404,
+                    message,
+                };
+                throw error;
+            }
+            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeUpdate)) {
+                yield defaultHooks.beforeUpdate(data, event);
+            }
+            else {
+                defaultHooks.beforeUpdate(data, event);
+            }
+            for (const [k, v] of Object.entries(JSON.parse(event.body))) {
+                data[k] = v;
+            }
+            yield data.save();
+            if ((0, types_1.isAsyncFunction)(defaultHooks.afterUpdate)) {
+                yield defaultHooks.afterUpdate(data, event);
+            }
+            else {
+                defaultHooks.afterUpdate(data, event);
+            }
+            const defaultBody = {
+                code: 200,
+                message: "Data updated successful.",
+                data,
+            };
+            return (0, exports.createLambdaResponse)(200, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                ? yield defaultHooks.beforeResponse(defaultBody, event)
+                : defaultHooks.beforeResponse(defaultBody, event));
+        }
+        else if (method == "delete") {
+            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+                yield defaultHooks.beforeFind(event);
+            }
+            else {
+                defaultHooks.beforeFind(event);
+            }
+            let where = (0, query_to_where_1.default)(event.queryStringParameters, connector);
+            let data = null;
+            let options = null;
+            if (connector == "sequelize") {
+                options = {
+                    where,
+                };
+            }
+            else if (connector == "mongoose") {
+                options = where;
+            }
+            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+                yield defaultHooks.beforeQuery(options, event);
+            }
+            else {
+                defaultHooks.beforeQuery(options, event);
+            }
+            let cursor = null;
+            if (connector == "mongoose") {
+                if ("projection" in event.queryStringParameters &&
+                    event.queryStringParameters.projection) {
+                    cursor = Model.findOne(options, (0, is_json_1.default)(event.queryStringParameters.projection)
+                        ? JSON.parse(event.queryStringParameters.projection)
+                        : event.queryStringParameters.projection);
+                }
+                else {
+                    cursor = Model.findOne(options);
+                }
+                if ("sort" in event.queryStringParameters &&
+                    event.queryStringParameters.sort) {
+                    cursor = cursor.sort((0, is_json_1.default)(event.queryStringParameters.sort)
+                        ? JSON.parse(event.queryStringParameters.sort)
+                        : event.queryStringParameters.sort);
+                }
+            }
+            else {
+                if ("projection" in event.queryStringParameters &&
+                    event.queryStringParameters.projection) {
+                    options["attributes"] = (0, is_json_1.default)(event.queryStringParameters.projection)
+                        ? JSON.parse(event.queryStringParameters.projection)
+                        : event.queryStringParameters.projection;
+                }
+                if ("sort" in event.queryStringParameters &&
+                    event.queryStringParameters.sort) {
+                    options["order"] = (0, is_json_1.default)(event.queryStringParameters.sort)
+                        ? JSON.parse(event.queryStringParameters.sort)
+                        : event.queryStringParameters.sort;
+                }
+                cursor = Model.findOne(options);
+            }
+            data = yield cursor;
+            if (!data) {
+                const message = modelOptions.message || "Data not found!";
+                const error = new Error(message);
+                error.body = {
+                    code: 404,
+                    message,
+                };
+                throw error;
+            }
+            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeDelete)) {
+                yield defaultHooks.beforeDelete(data, event);
+            }
+            else {
+                defaultHooks.beforeDelete(data, event);
+            }
+            if (connector == "sequelize") {
+                yield data.destroy();
+            }
+            else if (connector == "mongoose") {
+                yield data.remove();
+            }
+            if ((0, types_1.isAsyncFunction)(defaultHooks.afterDelete)) {
+                yield defaultHooks.afterDelete(event);
+            }
+            else {
+                defaultHooks.afterDelete(event);
+            }
+            const defaultBody = {
+                code: 204,
+                message: "Data deleted successful.",
+            };
+            return (0, exports.createLambdaResponse)(204, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                ? yield defaultHooks.beforeResponse(defaultBody, event)
+                : defaultHooks.beforeResponse(defaultBody, event));
+        }
+        else {
+            const err = new Error("Url not found!");
+            err.status = 404;
+            err.body = {
+                code: 404,
+                message: err.message,
+            };
+            throw err;
+        }
+    }));
+};
+exports.brewCrudLambdaFunc = brewCrudLambdaFunc;
 const brewAzureFuncFindAll = (Model, hooks = {}, connector = "sequelize", sequelize = null, searchColumns = []) => {
     const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody, ctx, req) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { } }, hooks);
     return (0, exports.brewBlankAzureFunc)((context, req) => __awaiter(void 0, void 0, void 0, function* () {
@@ -1320,6 +1820,142 @@ const brewExpressFuncFindAll = (Model, hooks = {}, connector = "sequelize", sequ
     }));
 };
 exports.brewExpressFuncFindAll = brewExpressFuncFindAll;
+const brewLambdaFuncFindAll = (Model, hooks = {}, connector = "sequelize", sequelize = null, searchColumns = []) => {
+    const defaultHooks = Object.assign({ beforeFind: (event) => { }, beforeResponse: (defaultBody, event) => defaultBody, beforeQuery: (defaultOptions, event) => { } }, hooks);
+    return (0, exports.brewBlankLambdaFunc)((event) => __awaiter(void 0, void 0, void 0, function* () {
+        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+            yield defaultHooks.beforeFind(event);
+        }
+        else {
+            defaultHooks.beforeFind(event);
+        }
+        let data = null;
+        let total = 0;
+        const where = (0, query_to_where_1.default)(event.queryStringParameters, connector, sequelize, searchColumns);
+        let options = null;
+        if (connector == "sequelize") {
+            options = {
+                where,
+            };
+        }
+        else if (connector == "mongoose") {
+            options = where;
+        }
+        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+            yield defaultHooks.beforeQuery(options, event);
+        }
+        else {
+            defaultHooks.beforeQuery(options, event);
+        }
+        let pagination = {};
+        if ("page" in event.queryStringParameters &&
+            "perpage" in event.queryStringParameters) {
+            const page = parseInt(event.queryStringParameters.page);
+            const perpage = parseInt(event.queryStringParameters.perpage);
+            const offset = (page - 1) * perpage;
+            if (connector == "sequelize") {
+                options = Object.assign(Object.assign({}, options), { limit: perpage, offset });
+                if ("projection" in event.queryStringParameters &&
+                    event.queryStringParameters.projection) {
+                    options["attributes"] = (0, is_json_1.default)(event.queryStringParameters.projection)
+                        ? JSON.parse(event.queryStringParameters.projection)
+                        : event.queryStringParameters.projection;
+                }
+                if ("sort" in event.queryStringParameters &&
+                    event.queryStringParameters.sort) {
+                    options["order"] = (0, is_json_1.default)(event.queryStringParameters.sort)
+                        ? JSON.parse(event.queryStringParameters.sort)
+                        : event.queryStringParameters.sort;
+                }
+                if ("group" in event.queryStringParameters &&
+                    event.queryStringParameters.group) {
+                    options["group"] = (0, is_json_1.default)(event.queryStringParameters.group)
+                        ? JSON.parse(event.queryStringParameters.group)
+                        : event.queryStringParameters.group;
+                }
+                const { rows, count } = yield Model.findAndCountAll(options);
+                data = rows;
+                total = count;
+            }
+            else if (connector == "mongoose") {
+                let cursor = null;
+                if ("projection" in event.queryStringParameters &&
+                    event.queryStringParameters.projection) {
+                    cursor = Model.find(options, (0, is_json_1.default)(event.queryStringParameters.projection)
+                        ? JSON.parse(event.queryStringParameters.projection)
+                        : event.queryStringParameters.projection);
+                }
+                else {
+                    cursor = Model.find(options);
+                }
+                if ("sort" in event.queryStringParameters &&
+                    event.queryStringParameters.sort) {
+                    cursor = cursor.sort((0, is_json_1.default)(event.queryStringParameters.sort)
+                        ? JSON.parse(event.queryStringParameters.sort)
+                        : event.queryStringParameters.sort);
+                }
+                data = yield cursor.skip(offset).limit(perpage);
+                total = yield Model.countDocuments(options);
+            }
+            pagination = {
+                page,
+                perpage,
+                pagecounts: Math.ceil(total / perpage),
+            };
+        }
+        else {
+            if (connector == "sequelize") {
+                if ("projection" in event.queryStringParameters &&
+                    event.queryStringParameters.projection) {
+                    options["attributes"] = (0, is_json_1.default)(event.queryStringParameters.projection)
+                        ? JSON.parse(event.queryStringParameters.projection)
+                        : event.queryStringParameters.projection;
+                }
+                if ("sort" in event.queryStringParameters &&
+                    event.queryStringParameters.sort) {
+                    options["order"] = (0, is_json_1.default)(event.queryStringParameters.sort)
+                        ? JSON.parse(event.queryStringParameters.sort)
+                        : event.queryStringParameters.sort;
+                }
+                if ("group" in event.queryStringParameters &&
+                    event.queryStringParameters.group) {
+                    options["group"] = (0, is_json_1.default)(event.queryStringParameters.group)
+                        ? JSON.parse(event.queryStringParameters.group)
+                        : event.queryStringParameters.group;
+                }
+                const { rows, count } = yield Model.findAndCountAll(options);
+                data = rows;
+                total = count;
+            }
+            else if (connector == "mongoose") {
+                let cursor = null;
+                if ("projection" in event.queryStringParameters &&
+                    event.queryStringParameters.projection) {
+                    cursor = Model.find(options, (0, is_json_1.default)(event.queryStringParameters.projection)
+                        ? JSON.parse(event.queryStringParameters.projection)
+                        : event.queryStringParameters.projection);
+                }
+                else {
+                    cursor = Model.find(options);
+                }
+                if ("sort" in event.queryStringParameters &&
+                    event.queryStringParameters.sort) {
+                    cursor = cursor.sort((0, is_json_1.default)(event.queryStringParameters.sort)
+                        ? JSON.parse(event.queryStringParameters.sort)
+                        : event.queryStringParameters.sort);
+                }
+                data = yield cursor;
+                total = data.length;
+            }
+        }
+        const defaultBody = Object.assign({ code: 200, message: "Data fetched successful.", data,
+            total }, pagination);
+        return (0, exports.createLambdaResponse)(200, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            ? yield defaultHooks.beforeResponse(defaultBody, event)
+            : defaultHooks.beforeResponse(defaultBody, event));
+    }));
+};
+exports.brewLambdaFuncFindAll = brewLambdaFuncFindAll;
 const brewAzureFuncFindOne = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
     const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody, ctx, req) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { } }, hooks);
     return (0, exports.brewBlankAzureFunc)((context, req) => __awaiter(void 0, void 0, void 0, function* () {
@@ -1471,6 +2107,85 @@ const brewExpressFuncFindOne = (Model, hooks = {}, message = "Data not found!", 
     }));
 };
 exports.brewExpressFuncFindOne = brewExpressFuncFindOne;
+const brewLambdaFuncFindOne = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
+    const defaultHooks = Object.assign({ beforeFind: (event) => { }, beforeResponse: (defaultBody, event) => defaultBody, beforeQuery: (defaultOptions, event) => { } }, hooks);
+    return (0, exports.brewBlankLambdaFunc)((event) => __awaiter(void 0, void 0, void 0, function* () {
+        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+            yield defaultHooks.beforeFind(event);
+        }
+        else {
+            defaultHooks.beforeFind(event);
+        }
+        const where = (0, query_to_where_1.default)(event.queryStringParameters, connector);
+        let data = null;
+        let options = null;
+        if (connector == "sequelize") {
+            options = {
+                where,
+            };
+        }
+        else if (connector == "mongoose") {
+            options = where;
+        }
+        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+            yield defaultHooks.beforeQuery(options, event);
+        }
+        else {
+            defaultHooks.beforeQuery(options, event);
+        }
+        let cursor = null;
+        if (connector == "mongoose") {
+            if ("projection" in event.queryStringParameters &&
+                event.queryStringParameters.projection) {
+                cursor = Model.findOne(options, (0, is_json_1.default)(event.queryStringParameters.projection)
+                    ? JSON.parse(event.queryStringParameters.projection)
+                    : event.queryStringParameters.projection);
+            }
+            else {
+                cursor = Model.findOne(options);
+            }
+            if ("sort" in event.queryStringParameters &&
+                event.queryStringParameters.sort) {
+                cursor = cursor.sort((0, is_json_1.default)(event.queryStringParameters.sort)
+                    ? JSON.parse(event.queryStringParameters.sort)
+                    : event.queryStringParameters.sort);
+            }
+        }
+        else {
+            if ("projection" in event.queryStringParameters &&
+                event.queryStringParameters.projection) {
+                options["attributes"] = (0, is_json_1.default)(event.queryStringParameters.projection)
+                    ? JSON.parse(event.queryStringParameters.projection)
+                    : event.queryStringParameters.projection;
+            }
+            if ("sort" in event.queryStringParameters &&
+                event.queryStringParameters.sort) {
+                options["order"] = (0, is_json_1.default)(event.queryStringParameters.sort)
+                    ? JSON.parse(event.queryStringParameters.sort)
+                    : event.queryStringParameters.sort;
+            }
+            cursor = Model.findOne(options);
+        }
+        data = yield cursor;
+        if (!data) {
+            const error = new Error(message);
+            error.body = {
+                code: 404,
+                message,
+            };
+            throw error;
+        }
+        const defaultBody = {
+            code: 200,
+            message: "Data fetched successful.",
+            data,
+        };
+        return (0, exports.createLambdaResponse)(200, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            ? yield defaultHooks.beforeResponse(defaultBody, event)
+            : defaultHooks.beforeResponse(defaultBody, event));
+    }));
+};
+exports.brewLambdaFuncFindOne = brewLambdaFuncFindOne;
 const brewAzureFuncUpdate = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
     const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody, ctx, req) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { }, beforeUpdate: (data, ctx, req) => { }, afterUpdate: (data, ctx, req) => { } }, hooks);
     return (0, exports.brewBlankAzureFunc)((context, req) => __awaiter(void 0, void 0, void 0, function* () {
@@ -1654,6 +2369,101 @@ const brewExpressFuncUpdate = (Model, hooks = {}, message = "Data not found!", c
     }));
 };
 exports.brewExpressFuncUpdate = brewExpressFuncUpdate;
+const brewLambdaFuncUpdate = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
+    const defaultHooks = Object.assign({ beforeFind: (event) => { }, beforeResponse: (defaultBody, event) => defaultBody, beforeQuery: (defaultOptions, event) => { }, beforeUpdate: (data, event) => { }, afterUpdate: (data, event) => { } }, hooks);
+    return (0, exports.brewBlankLambdaFunc)((event) => __awaiter(void 0, void 0, void 0, function* () {
+        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+            yield defaultHooks.beforeFind(event);
+        }
+        else {
+            defaultHooks.beforeFind(event);
+        }
+        const where = (0, query_to_where_1.default)(event.queryStringParameters, connector);
+        let data = null;
+        let options = null;
+        if (connector == "sequelize") {
+            options = {
+                where,
+            };
+        }
+        else if (connector == "mongoose") {
+            options = where;
+        }
+        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+            yield defaultHooks.beforeQuery(options, event);
+        }
+        else {
+            defaultHooks.beforeQuery(options, event);
+        }
+        let cursor = null;
+        if (connector == "mongoose") {
+            if ("projection" in event.queryStringParameters &&
+                event.queryStringParameters.projection) {
+                cursor = Model.findOne(options, (0, is_json_1.default)(event.queryStringParameters.projection)
+                    ? JSON.parse(event.queryStringParameters.projection)
+                    : event.queryStringParameters.projection);
+            }
+            else {
+                cursor = Model.findOne(options);
+            }
+            if ("sort" in event.queryStringParameters &&
+                event.queryStringParameters.sort) {
+                cursor = cursor.sort((0, is_json_1.default)(event.queryStringParameters.sort)
+                    ? JSON.parse(event.queryStringParameters.sort)
+                    : event.queryStringParameters.sort);
+            }
+        }
+        else {
+            if ("projection" in event.queryStringParameters &&
+                event.queryStringParameters.projection) {
+                options["attributes"] = (0, is_json_1.default)(event.queryStringParameters.projection)
+                    ? JSON.parse(event.queryStringParameters.projection)
+                    : event.queryStringParameters.projection;
+            }
+            if ("sort" in event.queryStringParameters &&
+                event.queryStringParameters.sort) {
+                options["order"] = (0, is_json_1.default)(event.queryStringParameters.sort)
+                    ? JSON.parse(event.queryStringParameters.sort)
+                    : event.queryStringParameters.sort;
+            }
+            cursor = Model.findOne(options);
+        }
+        data = yield cursor;
+        if (!data) {
+            const error = new Error(message);
+            error.body = {
+                code: 404,
+                message,
+            };
+            throw error;
+        }
+        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeUpdate)) {
+            yield defaultHooks.beforeUpdate(data, event);
+        }
+        else {
+            defaultHooks.beforeUpdate(data, event);
+        }
+        for (const [k, v] of Object.entries(JSON.parse(event.body))) {
+            data[k] = v;
+        }
+        yield data.save();
+        if ((0, types_1.isAsyncFunction)(defaultHooks.afterUpdate)) {
+            yield defaultHooks.afterUpdate(data, event);
+        }
+        else {
+            defaultHooks.afterUpdate(data, event);
+        }
+        const defaultBody = {
+            code: 200,
+            message: "Data updated successful.",
+            data,
+        };
+        return (0, exports.createLambdaResponse)(200, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            ? yield defaultHooks.beforeResponse(defaultBody, event)
+            : defaultHooks.beforeResponse(defaultBody, event));
+    }));
+};
+exports.brewLambdaFuncUpdate = brewLambdaFuncUpdate;
 const brewAzureFuncDelete = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
     const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody, ctx, req) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { }, beforeDelete: (data, ctx, req) => { }, afterDelete: (ctx, req) => { } }, hooks);
     return (0, exports.brewBlankAzureFunc)((context, req) => __awaiter(void 0, void 0, void 0, function* () {
@@ -1839,6 +2649,102 @@ const brewExpressFuncDelete = (Model, hooks = {}, message = "Data not found!", c
     }));
 };
 exports.brewExpressFuncDelete = brewExpressFuncDelete;
+const brewLambdaFuncDelete = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
+    const defaultHooks = Object.assign({ beforeFind: (event) => { }, beforeResponse: (defaultBody, event) => defaultBody, beforeQuery: (defaultOptions, event) => { }, beforeDelete: (data, event) => { }, afterDelete: (event) => { } }, hooks);
+    return (0, exports.brewBlankLambdaFunc)((event) => __awaiter(void 0, void 0, void 0, function* () {
+        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+            yield defaultHooks.beforeFind(event);
+        }
+        else {
+            defaultHooks.beforeFind(event);
+        }
+        const where = (0, query_to_where_1.default)(event.queryStringParameters, connector);
+        let data = null;
+        let options = null;
+        if (connector == "sequelize") {
+            options = {
+                where,
+            };
+        }
+        else if (connector == "mongoose") {
+            options = where;
+        }
+        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+            yield defaultHooks.beforeQuery(options, event);
+        }
+        else {
+            defaultHooks.beforeQuery(options, event);
+        }
+        let cursor = null;
+        if (connector == "mongoose") {
+            if ("projection" in event.queryStringParameters &&
+                event.queryStringParameters.projection) {
+                cursor = Model.findOne(options, (0, is_json_1.default)(event.queryStringParameters.projection)
+                    ? JSON.parse(event.queryStringParameters.projection)
+                    : event.queryStringParameters.projection);
+            }
+            else {
+                cursor = Model.findOne(options);
+            }
+            if ("sort" in event.queryStringParameters &&
+                event.queryStringParameters.sort) {
+                cursor = cursor.sort((0, is_json_1.default)(event.queryStringParameters.sort)
+                    ? JSON.parse(event.queryStringParameters.sort)
+                    : event.queryStringParameters.sort);
+            }
+        }
+        else {
+            if ("projection" in event.queryStringParameters &&
+                event.queryStringParameters.projection) {
+                options["attributes"] = (0, is_json_1.default)(event.queryStringParameters.projection)
+                    ? JSON.parse(event.queryStringParameters.projection)
+                    : event.queryStringParameters.projection;
+            }
+            if ("sort" in event.queryStringParameters &&
+                event.queryStringParameters.sort) {
+                options["order"] = (0, is_json_1.default)(event.queryStringParameters.sort)
+                    ? JSON.parse(event.queryStringParameters.sort)
+                    : event.queryStringParameters.sort;
+            }
+            cursor = Model.findOne(options);
+        }
+        data = yield cursor;
+        if (!data) {
+            const error = new Error(message);
+            error.body = {
+                code: 404,
+                message,
+            };
+            throw error;
+        }
+        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeDelete)) {
+            yield defaultHooks.beforeDelete(data, event);
+        }
+        else {
+            defaultHooks.beforeDelete(data, event);
+        }
+        if (connector == "sequelize") {
+            yield data.destroy();
+        }
+        else if (connector == "mongoose") {
+            yield data.remove();
+        }
+        if ((0, types_1.isAsyncFunction)(defaultHooks.afterDelete)) {
+            yield defaultHooks.afterDelete(event);
+        }
+        else {
+            defaultHooks.afterDelete(event);
+        }
+        const defaultBody = {
+            code: 204,
+            message: "Data deleted successful.",
+        };
+        return (0, exports.createLambdaResponse)(204, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            ? yield defaultHooks.beforeResponse(defaultBody, event)
+            : defaultHooks.beforeResponse(defaultBody, event));
+    }));
+};
+exports.brewLambdaFuncDelete = brewLambdaFuncDelete;
 const brewExpressFuncCreateOrFindAll = (Model, hooks = {}, connector = "sequelize", sequelize = null, searchColumns = []) => {
     const defaultHooks = Object.assign({ beforeCreate: (req, res) => { }, afterCreate: (data, req, res) => { }, beforeResponse: (defaultBody) => defaultBody, beforeFind: (req, res) => { }, beforeQuery: (defaultOptions, req, res) => { }, afterFunctionStart: (req, res) => { } }, hooks);
     return (0, exports.brewBlankExpressFunc)((req, res) => __awaiter(void 0, void 0, void 0, function* () {

@@ -1,7 +1,12 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { Request, Response } from "express";
-import { AzureCreateHooks, AzureDeleteHooks, AzureFindHooks, ParamsMap, AzureUpdateHooks, ExpressCreateHooks, ExpressFuncHooks, ExpressFindHooks, ExpressUpdateHooks, ExpressDeleteHooks } from "./interfaces";
+import { AzureCreateHooks, AzureDeleteHooks, AzureFindHooks, ParamsMap, AzureUpdateHooks, ExpressCreateHooks, ExpressFuncHooks, ExpressFindHooks, ExpressUpdateHooks, ExpressDeleteHooks, LambdaCreateHooks, LambdaFindHooks, LambdaUpdateHooks, LambdaDeleteHooks } from "./interfaces";
+export declare const createLambdaResponse: (statusCode: number, body?: any, headers?: any) => {
+    statusCode: number;
+    headers: any;
+    body: string;
+};
 export declare const responseAzureFuncError: (context: Context, err: any) => void;
 export declare const responseExpressFuncError: (req: Request, res: Response, err: any) => void;
 export declare const responseLambdaFuncError: (event: APIGatewayProxyEvent, err: any) => APIGatewayProxyResult;
@@ -10,15 +15,21 @@ export declare const brewBlankAzureFunc: (cb: (ctx: Context, req: HttpRequest) =
 export declare const brewBlankLambdaFunc: (cb: (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>) => (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
 export declare const brewAzureFuncCreate: (Model: any, hooks?: AzureCreateHooks, connector?: string) => AzureFunction;
 export declare const brewExpressFuncCreate: (Model: any, hooks?: ExpressCreateHooks, connector?: string) => (req: Request, res: Response) => Promise<void>;
+export declare const brewLambdaFuncCreate: (Model: any, hooks?: LambdaCreateHooks, connector?: string) => (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
 export declare const brewCrudAzureFunc: (map: ParamsMap, connector?: string, sequelize?: any, matchKey?: string) => AzureFunction;
 export declare const brewCrudExpressFunc: (map: ParamsMap, connector?: string, sequelize?: any, matchKey?: string) => (req: Request, res: Response) => Promise<void>;
+export declare const brewCrudLambdaFunc: (map: ParamsMap, connector?: string, sequelize?: any, matchKey?: string) => (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
 export declare const brewAzureFuncFindAll: (Model: any, hooks?: AzureFindHooks, connector?: string, sequelize?: any, searchColumns?: string[]) => AzureFunction;
 export declare const brewExpressFuncFindAll: (Model: any, hooks?: ExpressFindHooks, connector?: string, sequelize?: any, searchColumns?: string[]) => (req: Request, res: Response) => Promise<void>;
+export declare const brewLambdaFuncFindAll: (Model: any, hooks?: LambdaFindHooks, connector?: string, sequelize?: any, searchColumns?: string[]) => (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
 export declare const brewAzureFuncFindOne: (Model: any, hooks?: AzureFindHooks, message?: string, connector?: string) => AzureFunction;
 export declare const brewExpressFuncFindOne: (Model: any, hooks?: ExpressFindHooks, message?: string, connector?: string) => (req: Request, res: Response) => Promise<void>;
+export declare const brewLambdaFuncFindOne: (Model: any, hooks?: LambdaFindHooks, message?: string, connector?: string) => (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
 export declare const brewAzureFuncUpdate: (Model: any, hooks?: AzureUpdateHooks, message?: string, connector?: string) => AzureFunction;
 export declare const brewExpressFuncUpdate: (Model: any, hooks?: ExpressUpdateHooks, message?: string, connector?: string) => (req: Request, res: Response) => Promise<void>;
+export declare const brewLambdaFuncUpdate: (Model: any, hooks?: LambdaUpdateHooks, message?: string, connector?: string) => (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
 export declare const brewAzureFuncDelete: (Model: any, hooks?: AzureDeleteHooks, message?: string, connector?: string) => AzureFunction;
 export declare const brewExpressFuncDelete: (Model: any, hooks?: ExpressDeleteHooks, message?: string, connector?: string) => (req: Request, res: Response) => Promise<void>;
+export declare const brewLambdaFuncDelete: (Model: any, hooks?: LambdaDeleteHooks, message?: string, connector?: string) => (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
 export declare const brewExpressFuncCreateOrFindAll: (Model: any, hooks?: ExpressFuncHooks, connector?: string, sequelize?: any, searchColumns?: string[]) => (req: Request, res: Response) => Promise<void>;
 export declare const brewExpressFuncFindOneOrUpdateOrDeleteByParam: (Model: any, hooks?: ExpressFuncHooks, message?: string, paramKey?: string, connector?: string) => (req: Request, res: Response) => Promise<void>;

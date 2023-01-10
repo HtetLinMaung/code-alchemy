@@ -1,4 +1,5 @@
 import { Context, HttpRequest } from "@azure/functions";
+import { APIGatewayProxyEvent } from "aws-lambda";
 import { Request, Response } from "express";
 
 export interface DynamicObject {
@@ -30,6 +31,18 @@ export interface ExpressCreateHooks {
     defaultBody: DynamicObject,
     req: Request,
     res: Response
+  ) => DynamicObject;
+}
+
+export interface LambdaCreateHooks {
+  beforeCreate?: (event: APIGatewayProxyEvent) => Promise<void> | void;
+  afterCreate?: (
+    data: any,
+    event: APIGatewayProxyEvent
+  ) => Promise<void> | void;
+  beforeResponse?: (
+    defaultBody: DynamicObject,
+    event: APIGatewayProxyEvent
   ) => DynamicObject;
 }
 
@@ -107,12 +120,43 @@ export interface ExpressFuncHooks {
   ) => DynamicObject;
 }
 
+export interface LambdaFuncHooks {
+  afterFunctionStart?: (event: APIGatewayProxyEvent) => Promise<void> | void;
+  beforeFind?: (event: APIGatewayProxyEvent) => Promise<void> | void;
+  beforeQuery?: (
+    options: DynamicObject,
+    event: APIGatewayProxyEvent
+  ) => Promise<void> | void;
+  beforeCreate?: (event: APIGatewayProxyEvent) => Promise<void> | void;
+  afterCreate?: (
+    data: any,
+    event: APIGatewayProxyEvent
+  ) => Promise<void> | void;
+  beforeUpdate?: (
+    data: any,
+    event: APIGatewayProxyEvent
+  ) => Promise<void> | void;
+  afterUpdate?: (
+    data: any,
+    event: APIGatewayProxyEvent
+  ) => Promise<void> | void;
+  beforeDelete?: (
+    data: any,
+    event: APIGatewayProxyEvent
+  ) => Promise<void> | void;
+  afterDelete?: (event: APIGatewayProxyEvent) => Promise<void> | void;
+  beforeResponse?: (
+    defaultBody: DynamicObject,
+    event: APIGatewayProxyEvent
+  ) => DynamicObject;
+}
+
 export interface ParamsMap {
   [param: string]: ModelOptions;
 }
 export interface ModelOptions {
   model: any;
-  hooks?: AzureFuncHooks | ExpressFuncHooks;
+  hooks?: AzureFuncHooks | ExpressFuncHooks | LambdaFuncHooks;
   searchColumns?: string[];
   message?: string;
 }
@@ -142,6 +186,30 @@ export interface ExpressFindHooks {
     options: DynamicObject,
     req: Request,
     res: Response
+  ) => Promise<void> | void;
+}
+
+export interface LambdaFindHooks {
+  beforeResponse?: (
+    defaultBody: DynamicObject,
+    event: APIGatewayProxyEvent
+  ) => DynamicObject;
+  beforeFind?: (event: APIGatewayProxyEvent) => Promise<void> | void;
+  beforeQuery?: (
+    options: DynamicObject,
+    event: APIGatewayProxyEvent
+  ) => Promise<void> | void;
+}
+
+export interface LambdaFindHooks {
+  beforeResponse?: (
+    defaultBody: DynamicObject,
+    event: APIGatewayProxyEvent
+  ) => DynamicObject;
+  beforeFind?: (event: APIGatewayProxyEvent) => Promise<void> | void;
+  beforeQuery?: (
+    options: DynamicObject,
+    event: APIGatewayProxyEvent
   ) => Promise<void> | void;
 }
 
@@ -193,6 +261,26 @@ export interface ExpressUpdateHooks {
   ) => Promise<void> | void;
 }
 
+export interface LambdaUpdateHooks {
+  beforeResponse?: (
+    defaultBody: DynamicObject,
+    event: APIGatewayProxyEvent
+  ) => DynamicObject;
+  beforeFind?: (event: APIGatewayProxyEvent) => Promise<void> | void;
+  beforeUpdate?: (
+    data: any,
+    event: APIGatewayProxyEvent
+  ) => Promise<void> | void;
+  afterUpdate?: (
+    data: any,
+    event: APIGatewayProxyEvent
+  ) => Promise<void> | void;
+  beforeQuery?: (
+    options: DynamicObject,
+    event: APIGatewayProxyEvent
+  ) => Promise<void> | void;
+}
+
 export interface AzureDeleteHooks {
   beforeResponse?: (
     defaultBody: DynamicObject,
@@ -230,5 +318,22 @@ export interface ExpressDeleteHooks {
     options: DynamicObject,
     req: Request,
     res: Response
+  ) => Promise<void> | void;
+}
+
+export interface LambdaDeleteHooks {
+  beforeResponse?: (
+    defaultBody: DynamicObject,
+    event: APIGatewayProxyEvent
+  ) => DynamicObject;
+  beforeFind?: (event: APIGatewayProxyEvent) => Promise<void> | void;
+  beforeDelete?: (
+    data: any,
+    event: APIGatewayProxyEvent
+  ) => Promise<void> | void;
+  afterDelete?: (event: APIGatewayProxyEvent) => Promise<void> | void;
+  beforeQuery?: (
+    options: DynamicObject,
+    event: APIGatewayProxyEvent
   ) => Promise<void> | void;
 }
