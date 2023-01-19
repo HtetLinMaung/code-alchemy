@@ -13,10 +13,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.brewExpressFuncFindOneOrUpdateOrDeleteByParam = exports.brewExpressFuncCreateOrFindAll = exports.brewLambdaFuncDelete = exports.brewExpressFuncDelete = exports.brewAzureFuncDelete = exports.brewLambdaFuncUpdate = exports.brewExpressFuncUpdate = exports.brewAzureFuncUpdate = exports.brewLambdaFuncFindOne = exports.brewExpressFuncFindOne = exports.brewAzureFuncFindOne = exports.brewLambdaFuncFindAll = exports.brewExpressFuncFindAll = exports.brewAzureFuncFindAll = exports.brewCrudLambdaFunc = exports.brewCrudExpressFunc = exports.brewCrudAzureFunc = exports.brewLambdaFuncCreate = exports.brewExpressFuncCreate = exports.brewAzureFuncCreate = exports.brewBlankLambdaFunc = exports.brewBlankAzureFunc = exports.brewBlankExpressFunc = exports.responseLambdaFuncError = exports.responseExpressFuncError = exports.responseAzureFuncError = exports.createLambdaResponse = void 0;
-const types_1 = require("util/types");
 const is_json_1 = __importDefault(require("./utils/is-json"));
 const log_1 = __importDefault(require("./utils/log"));
 const query_to_where_1 = __importDefault(require("./utils/query-to-where"));
+const isAsyncFunction = (func) => {
+    const funcStr = func.toString();
+    return funcStr.includes("async") || funcStr.includes("__awaiter");
+};
 const createLambdaResponse = (statusCode, body = {}, headers = {}) => {
     return {
         statusCode: statusCode,
@@ -96,7 +99,7 @@ exports.responseLambdaFuncError = responseLambdaFuncError;
 const brewBlankExpressFunc = (cb) => {
     return (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            if ((0, types_1.isAsyncFunction)(cb) || cb.toString().includes("__awaiter")) {
+            if (isAsyncFunction(cb)) {
                 yield cb(req, res);
             }
             else {
@@ -112,7 +115,7 @@ exports.brewBlankExpressFunc = brewBlankExpressFunc;
 const brewBlankAzureFunc = (cb) => {
     return ((context, req) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            if ((0, types_1.isAsyncFunction)(cb) || cb.toString().includes("__awaiter")) {
+            if (isAsyncFunction(cb)) {
                 yield cb(context, req);
             }
             else {
@@ -128,7 +131,7 @@ exports.brewBlankAzureFunc = brewBlankAzureFunc;
 const brewBlankLambdaFunc = (cb) => {
     return (event) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            if ((0, types_1.isAsyncFunction)(cb) || cb.toString().includes("__awaiter")) {
+            if (isAsyncFunction(cb)) {
                 return yield cb(event);
             }
             return cb(event);
@@ -143,7 +146,7 @@ const brewAzureFuncCreate = (Model, hooks = {}, connector = "sequelize") => {
     const defaultHooks = Object.assign({ beforeCreate: (ctx, req) => { }, afterCreate: (data, ctx, req) => { }, beforeResponse: (defaultBody) => defaultBody }, hooks);
     return (0, exports.brewBlankAzureFunc)((context, req) => __awaiter(void 0, void 0, void 0, function* () {
         context.log("HTTP trigger function processed a request.");
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeCreate)) {
+        if (isAsyncFunction(defaultHooks.beforeCreate)) {
             yield defaultHooks.beforeCreate(context, req);
         }
         else {
@@ -157,7 +160,7 @@ const brewAzureFuncCreate = (Model, hooks = {}, connector = "sequelize") => {
             data = new Model(req.body);
             yield data.save();
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.afterCreate)) {
+        if (isAsyncFunction(defaultHooks.afterCreate)) {
             yield defaultHooks.afterCreate(data, context, req);
         }
         else {
@@ -170,7 +173,7 @@ const brewAzureFuncCreate = (Model, hooks = {}, connector = "sequelize") => {
         };
         context.res = {
             status: 201,
-            body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            body: isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, context, req)
                 : defaultHooks.beforeResponse(defaultBody, context, req),
         };
@@ -180,7 +183,7 @@ exports.brewAzureFuncCreate = brewAzureFuncCreate;
 const brewExpressFuncCreate = (Model, hooks = {}, connector = "sequelize") => {
     const defaultHooks = Object.assign({ beforeCreate: (req, res) => { }, afterCreate: (data, req, res) => { }, beforeResponse: (defaultBody) => defaultBody }, hooks);
     return (0, exports.brewBlankExpressFunc)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeCreate)) {
+        if (isAsyncFunction(defaultHooks.beforeCreate)) {
             yield defaultHooks.beforeCreate(req, res);
         }
         else {
@@ -194,7 +197,7 @@ const brewExpressFuncCreate = (Model, hooks = {}, connector = "sequelize") => {
             data = new Model(req.body);
             yield data.save();
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.afterCreate)) {
+        if (isAsyncFunction(defaultHooks.afterCreate)) {
             yield defaultHooks.afterCreate(data, req, res);
         }
         else {
@@ -207,7 +210,7 @@ const brewExpressFuncCreate = (Model, hooks = {}, connector = "sequelize") => {
         };
         res
             .status(201)
-            .json((0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            .json(isAsyncFunction(defaultHooks.beforeResponse)
             ? yield defaultHooks.beforeResponse(defaultBody, req, res)
             : defaultHooks.beforeResponse(defaultBody, req, res));
     }));
@@ -216,7 +219,7 @@ exports.brewExpressFuncCreate = brewExpressFuncCreate;
 const brewLambdaFuncCreate = (Model, hooks = {}, connector = "sequelize") => {
     const defaultHooks = Object.assign({ beforeCreate: (event) => { }, afterCreate: (event) => { }, beforeResponse: (defaultBody, event) => defaultBody }, hooks);
     return (0, exports.brewBlankLambdaFunc)((event) => __awaiter(void 0, void 0, void 0, function* () {
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeCreate)) {
+        if (isAsyncFunction(defaultHooks.beforeCreate)) {
             yield defaultHooks.beforeCreate(event);
         }
         else {
@@ -230,7 +233,7 @@ const brewLambdaFuncCreate = (Model, hooks = {}, connector = "sequelize") => {
             data = new Model(JSON.parse(event.body));
             yield data.save();
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.afterCreate)) {
+        if (isAsyncFunction(defaultHooks.afterCreate)) {
             yield defaultHooks.afterCreate(data, event);
         }
         else {
@@ -241,7 +244,7 @@ const brewLambdaFuncCreate = (Model, hooks = {}, connector = "sequelize") => {
             message: "Data created successful.",
             data,
         };
-        return (0, exports.createLambdaResponse)(201, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+        return (0, exports.createLambdaResponse)(201, isAsyncFunction(defaultHooks.beforeResponse)
             ? yield defaultHooks.beforeResponse(defaultBody, event)
             : defaultHooks.beforeResponse(defaultBody, event));
     }));
@@ -261,7 +264,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
         }
         const modelOptions = map[context.bindingData[matchKey]];
         const defaultHooks = Object.assign({ afterFunctionStart: (ctx, req) => { }, beforeCreate: (ctx, req) => { }, beforeFind: (ctx, req) => { }, beforeQuery: (defaultOptions, ctx, req) => { }, afterCreate: (data, ctx, req) => { }, beforeUpdate: (data, ctx, req) => { }, afterUpdate: (data, ctx, req) => { }, beforeDelete: (data, ctx, req) => { }, afterDelete: (ctx, req) => { }, beforeResponse: (defaultBody, ctx, req) => defaultBody }, (modelOptions.hooks || {}));
-        if ((0, types_1.isAsyncFunction)(defaultHooks.afterFunctionStart)) {
+        if (isAsyncFunction(defaultHooks.afterFunctionStart)) {
             yield defaultHooks.afterFunctionStart(context, req);
         }
         else {
@@ -270,7 +273,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
         const Model = modelOptions.model;
         const method = req.method.toLowerCase();
         if (method == "post") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeCreate)) {
+            if (isAsyncFunction(defaultHooks.beforeCreate)) {
                 yield defaultHooks.beforeCreate(context, req);
             }
             else {
@@ -284,7 +287,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
                 data = new Model(req.body);
                 yield data.save();
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.afterCreate)) {
+            if (isAsyncFunction(defaultHooks.afterCreate)) {
                 yield defaultHooks.afterCreate(data, context, req);
             }
             else {
@@ -297,13 +300,13 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
             };
             context.res = {
                 status: 201,
-                body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                body: isAsyncFunction(defaultHooks.beforeResponse)
                     ? yield defaultHooks.beforeResponse(defaultBody, context, req)
                     : defaultHooks.beforeResponse(defaultBody, context, req),
             };
         }
         else if (method == "get") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+            if (isAsyncFunction(defaultHooks.beforeFind)) {
                 yield defaultHooks.beforeFind(context, req);
             }
             else {
@@ -323,7 +326,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
                 else if (connector == "mongoose") {
                     options = where;
                 }
-                if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+                if (isAsyncFunction(defaultHooks.beforeQuery)) {
                     yield defaultHooks.beforeQuery(options, context, req);
                 }
                 else {
@@ -374,7 +377,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
                     data,
                 };
                 context.res = {
-                    body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                    body: isAsyncFunction(defaultHooks.beforeResponse)
                         ? yield defaultHooks.beforeResponse(defaultBody, context, req)
                         : defaultHooks.beforeResponse(defaultBody, context, req),
                 };
@@ -392,7 +395,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
                 else if (connector == "mongoose") {
                     options = where;
                 }
-                if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+                if (isAsyncFunction(defaultHooks.beforeQuery)) {
                     yield defaultHooks.beforeQuery(options, context, req);
                 }
                 else {
@@ -491,14 +494,14 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
                 const defaultBody = Object.assign({ code: 200, message: "Data fetched successful.", data,
                     total }, pagination);
                 context.res = {
-                    body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                    body: isAsyncFunction(defaultHooks.beforeResponse)
                         ? yield defaultHooks.beforeResponse(defaultBody, context, req)
                         : defaultHooks.beforeResponse(defaultBody, context, req),
                 };
             }
         }
         else if (method == "put") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+            if (isAsyncFunction(defaultHooks.beforeFind)) {
                 yield defaultHooks.beforeFind(context, req);
             }
             else {
@@ -515,7 +518,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
             else if (connector == "mongoose") {
                 options = where;
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+            if (isAsyncFunction(defaultHooks.beforeQuery)) {
                 yield defaultHooks.beforeQuery(options, context, req);
             }
             else {
@@ -558,7 +561,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
                 };
                 throw error;
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeUpdate)) {
+            if (isAsyncFunction(defaultHooks.beforeUpdate)) {
                 yield defaultHooks.beforeUpdate(data, context, req);
             }
             else {
@@ -568,7 +571,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
                 data[k] = v;
             }
             yield data.save();
-            if ((0, types_1.isAsyncFunction)(defaultHooks.afterUpdate)) {
+            if (isAsyncFunction(defaultHooks.afterUpdate)) {
                 yield defaultHooks.afterUpdate(data, context, req);
             }
             else {
@@ -580,13 +583,13 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
                 data,
             };
             context.res = {
-                body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                body: isAsyncFunction(defaultHooks.beforeResponse)
                     ? yield defaultHooks.beforeResponse(defaultBody, context, req)
                     : defaultHooks.beforeResponse(defaultBody, context, req),
             };
         }
         else if (method == "delete") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+            if (isAsyncFunction(defaultHooks.beforeFind)) {
                 yield defaultHooks.beforeFind(context, req);
             }
             else {
@@ -603,7 +606,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
             else if (connector == "mongoose") {
                 options = where;
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+            if (isAsyncFunction(defaultHooks.beforeQuery)) {
                 yield defaultHooks.beforeQuery(options, context, req);
             }
             else {
@@ -646,7 +649,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
                 };
                 throw error;
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeDelete)) {
+            if (isAsyncFunction(defaultHooks.beforeDelete)) {
                 yield defaultHooks.beforeDelete(data, context, req);
             }
             else {
@@ -658,7 +661,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
             else if (connector == "mongoose") {
                 yield data.remove();
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.afterDelete)) {
+            if (isAsyncFunction(defaultHooks.afterDelete)) {
                 yield defaultHooks.afterDelete(context, req);
             }
             else {
@@ -669,7 +672,7 @@ const brewCrudAzureFunc = (map, connector = "sequelize", sequelize = null, match
                 message: "Data deleted successful.",
             };
             context.res = {
-                body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                body: isAsyncFunction(defaultHooks.beforeResponse)
                     ? yield defaultHooks.beforeResponse(defaultBody, context, req)
                     : defaultHooks.beforeResponse(defaultBody, context, req),
             };
@@ -699,7 +702,7 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
         }
         const modelOptions = map[req.params[matchKey]];
         const defaultHooks = Object.assign({ afterFunctionStart: (req, res) => { }, beforeCreate: (req, res) => { }, beforeFind: (req, res) => { }, beforeQuery: (defaultOptions, req, res) => { }, afterCreate: (data, req, res) => { }, beforeUpdate: (data, req, res) => { }, afterUpdate: (data, req, res) => { }, beforeDelete: (data, req, res) => { }, afterDelete: (req, res) => { }, beforeResponse: (defaultBody, req, res) => defaultBody }, (modelOptions.hooks || {}));
-        if ((0, types_1.isAsyncFunction)(defaultHooks.afterFunctionStart)) {
+        if (isAsyncFunction(defaultHooks.afterFunctionStart)) {
             yield defaultHooks.afterFunctionStart(req, res);
         }
         else {
@@ -708,7 +711,7 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
         const Model = modelOptions.model;
         const method = req.method.toLowerCase();
         if (method == "post") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeCreate)) {
+            if (isAsyncFunction(defaultHooks.beforeCreate)) {
                 yield defaultHooks.beforeCreate(req, res);
             }
             else {
@@ -722,7 +725,7 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
                 data = new Model(req.body);
                 yield data.save();
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.afterCreate)) {
+            if (isAsyncFunction(defaultHooks.afterCreate)) {
                 yield defaultHooks.afterCreate(data, req, res);
             }
             else {
@@ -735,12 +738,12 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
             };
             res
                 .status(201)
-                .json((0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                .json(isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, req, res)
                 : defaultHooks.beforeResponse(defaultBody, req, res));
         }
         else if (method == "get") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+            if (isAsyncFunction(defaultHooks.beforeFind)) {
                 yield defaultHooks.beforeFind(req, res);
             }
             else {
@@ -760,7 +763,7 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
                 else if (connector == "mongoose") {
                     options = where;
                 }
-                if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+                if (isAsyncFunction(defaultHooks.beforeQuery)) {
                     yield defaultHooks.beforeQuery(options, req, res);
                 }
                 else {
@@ -809,7 +812,7 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
                     message: "Data fetched successful.",
                     data,
                 };
-                res.json((0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                res.json(isAsyncFunction(defaultHooks.beforeResponse)
                     ? yield defaultHooks.beforeResponse(defaultBody, req, res)
                     : defaultHooks.beforeResponse(defaultBody, req, res));
             }
@@ -826,7 +829,7 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
                 else if (connector == "mongoose") {
                     options = where;
                 }
-                if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+                if (isAsyncFunction(defaultHooks.beforeQuery)) {
                     yield defaultHooks.beforeQuery(options, req, res);
                 }
                 else {
@@ -924,13 +927,13 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
                 }
                 const defaultBody = Object.assign({ code: 200, message: "Data fetched successful.", data,
                     total }, pagination);
-                res.json((0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                res.json(isAsyncFunction(defaultHooks.beforeResponse)
                     ? yield defaultHooks.beforeResponse(defaultBody, req, res)
                     : defaultHooks.beforeResponse(defaultBody, req, res));
             }
         }
         else if (method == "put") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+            if (isAsyncFunction(defaultHooks.beforeFind)) {
                 yield defaultHooks.beforeFind(req, res);
             }
             else {
@@ -947,7 +950,7 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
             else if (connector == "mongoose") {
                 options = where;
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+            if (isAsyncFunction(defaultHooks.beforeQuery)) {
                 yield defaultHooks.beforeQuery(options, req, res);
             }
             else {
@@ -992,7 +995,7 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
                 };
                 throw error;
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeUpdate)) {
+            if (isAsyncFunction(defaultHooks.beforeUpdate)) {
                 yield defaultHooks.beforeUpdate(data, req, res);
             }
             else {
@@ -1002,7 +1005,7 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
                 data[k] = v;
             }
             yield data.save();
-            if ((0, types_1.isAsyncFunction)(defaultHooks.afterUpdate)) {
+            if (isAsyncFunction(defaultHooks.afterUpdate)) {
                 yield defaultHooks.afterUpdate(data, req, res);
             }
             else {
@@ -1013,12 +1016,12 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
                 message: "Data updated successful.",
                 data,
             };
-            res.json((0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            res.json(isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, req, res)
                 : defaultHooks.beforeResponse(defaultBody, req, res));
         }
         else if (method == "delete") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+            if (isAsyncFunction(defaultHooks.beforeFind)) {
                 yield defaultHooks.beforeFind(req, res);
             }
             else {
@@ -1035,7 +1038,7 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
             else if (connector == "mongoose") {
                 options = where;
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+            if (isAsyncFunction(defaultHooks.beforeQuery)) {
                 yield defaultHooks.beforeQuery(options, req, res);
             }
             else {
@@ -1080,7 +1083,7 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
                 };
                 throw error;
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeDelete)) {
+            if (isAsyncFunction(defaultHooks.beforeDelete)) {
                 yield defaultHooks.beforeDelete(data, req, res);
             }
             else {
@@ -1092,7 +1095,7 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
             else if (connector == "mongoose") {
                 yield data.remove();
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.afterDelete)) {
+            if (isAsyncFunction(defaultHooks.afterDelete)) {
                 yield defaultHooks.afterDelete(req, res);
             }
             else {
@@ -1102,7 +1105,7 @@ const brewCrudExpressFunc = (map, connector = "sequelize", sequelize = null, mat
                 code: 204,
                 message: "Data deleted successful.",
             };
-            res.json((0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            res.json(isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, req, res)
                 : defaultHooks.beforeResponse(defaultBody, req, res));
         }
@@ -1131,7 +1134,7 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
         }
         const modelOptions = map[event.pathParameters[matchKey]];
         const defaultHooks = Object.assign({ afterFunctionStart: (event) => { }, beforeCreate: (event) => { }, beforeFind: (event) => { }, beforeQuery: (defaultOptions, event) => { }, afterCreate: (data, event) => { }, beforeUpdate: (data, event) => { }, afterUpdate: (data, event) => { }, beforeDelete: (data, event) => { }, afterDelete: (event) => { }, beforeResponse: (defaultBody, event) => defaultBody }, (modelOptions.hooks || {}));
-        if ((0, types_1.isAsyncFunction)(defaultHooks.afterFunctionStart)) {
+        if (isAsyncFunction(defaultHooks.afterFunctionStart)) {
             yield defaultHooks.afterFunctionStart(event);
         }
         else {
@@ -1140,7 +1143,7 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
         const Model = modelOptions.model;
         const method = event.httpMethod.toLowerCase();
         if (method == "post") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeCreate)) {
+            if (isAsyncFunction(defaultHooks.beforeCreate)) {
                 yield defaultHooks.beforeCreate(event);
             }
             else {
@@ -1154,7 +1157,7 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
                 data = new Model(JSON.parse(event.body));
                 yield data.save();
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.afterCreate)) {
+            if (isAsyncFunction(defaultHooks.afterCreate)) {
                 yield defaultHooks.afterCreate(data, event);
             }
             else {
@@ -1165,12 +1168,12 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
                 message: "Data created successful.",
                 data,
             };
-            return (0, exports.createLambdaResponse)(201, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            return (0, exports.createLambdaResponse)(201, isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, event)
                 : defaultHooks.beforeResponse(defaultBody, event));
         }
         else if (method == "get") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+            if (isAsyncFunction(defaultHooks.beforeFind)) {
                 yield defaultHooks.beforeFind(event);
             }
             else {
@@ -1190,7 +1193,7 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
                 else if (connector == "mongoose") {
                     options = where;
                 }
-                if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+                if (isAsyncFunction(defaultHooks.beforeQuery)) {
                     yield defaultHooks.beforeQuery(options, event);
                 }
                 else {
@@ -1243,7 +1246,7 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
                     message: "Data fetched successful.",
                     data,
                 };
-                return (0, exports.createLambdaResponse)(200, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                return (0, exports.createLambdaResponse)(200, isAsyncFunction(defaultHooks.beforeResponse)
                     ? yield defaultHooks.beforeResponse(defaultBody, event)
                     : defaultHooks.beforeResponse(defaultBody, event));
             }
@@ -1260,7 +1263,7 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
                 else if (connector == "mongoose") {
                     options = where;
                 }
-                if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+                if (isAsyncFunction(defaultHooks.beforeQuery)) {
                     yield defaultHooks.beforeQuery(options, event);
                 }
                 else {
@@ -1369,13 +1372,13 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
                 }
                 const defaultBody = Object.assign({ code: 200, message: "Data fetched successful.", data,
                     total }, pagination);
-                return (0, exports.createLambdaResponse)(200, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                return (0, exports.createLambdaResponse)(200, isAsyncFunction(defaultHooks.beforeResponse)
                     ? yield defaultHooks.beforeResponse(defaultBody, event)
                     : defaultHooks.beforeResponse(defaultBody, event));
             }
         }
         else if (method == "put") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+            if (isAsyncFunction(defaultHooks.beforeFind)) {
                 yield defaultHooks.beforeFind(event);
             }
             else {
@@ -1392,7 +1395,7 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
             else if (connector == "mongoose") {
                 options = where;
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+            if (isAsyncFunction(defaultHooks.beforeQuery)) {
                 yield defaultHooks.beforeQuery(options, event);
             }
             else {
@@ -1441,7 +1444,7 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
                 };
                 throw error;
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeUpdate)) {
+            if (isAsyncFunction(defaultHooks.beforeUpdate)) {
                 yield defaultHooks.beforeUpdate(data, event);
             }
             else {
@@ -1451,7 +1454,7 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
                 data[k] = v;
             }
             yield data.save();
-            if ((0, types_1.isAsyncFunction)(defaultHooks.afterUpdate)) {
+            if (isAsyncFunction(defaultHooks.afterUpdate)) {
                 yield defaultHooks.afterUpdate(data, event);
             }
             else {
@@ -1462,12 +1465,12 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
                 message: "Data updated successful.",
                 data,
             };
-            return (0, exports.createLambdaResponse)(200, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            return (0, exports.createLambdaResponse)(200, isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, event)
                 : defaultHooks.beforeResponse(defaultBody, event));
         }
         else if (method == "delete") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+            if (isAsyncFunction(defaultHooks.beforeFind)) {
                 yield defaultHooks.beforeFind(event);
             }
             else {
@@ -1484,7 +1487,7 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
             else if (connector == "mongoose") {
                 options = where;
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+            if (isAsyncFunction(defaultHooks.beforeQuery)) {
                 yield defaultHooks.beforeQuery(options, event);
             }
             else {
@@ -1533,7 +1536,7 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
                 };
                 throw error;
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeDelete)) {
+            if (isAsyncFunction(defaultHooks.beforeDelete)) {
                 yield defaultHooks.beforeDelete(data, event);
             }
             else {
@@ -1545,7 +1548,7 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
             else if (connector == "mongoose") {
                 yield data.remove();
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.afterDelete)) {
+            if (isAsyncFunction(defaultHooks.afterDelete)) {
                 yield defaultHooks.afterDelete(event);
             }
             else {
@@ -1555,7 +1558,7 @@ const brewCrudLambdaFunc = (map, connector = "sequelize", sequelize = null, matc
                 code: 204,
                 message: "Data deleted successful.",
             };
-            return (0, exports.createLambdaResponse)(204, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            return (0, exports.createLambdaResponse)(204, isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, event)
                 : defaultHooks.beforeResponse(defaultBody, event));
         }
@@ -1575,7 +1578,7 @@ const brewAzureFuncFindAll = (Model, hooks = {}, connector = "sequelize", sequel
     const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody, ctx, req) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { } }, hooks);
     return (0, exports.brewBlankAzureFunc)((context, req) => __awaiter(void 0, void 0, void 0, function* () {
         context.log("HTTP trigger function processed a request.");
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+        if (isAsyncFunction(defaultHooks.beforeFind)) {
             yield defaultHooks.beforeFind(context, req);
         }
         else {
@@ -1593,7 +1596,7 @@ const brewAzureFuncFindAll = (Model, hooks = {}, connector = "sequelize", sequel
         else if (connector == "mongoose") {
             options = where;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+        if (isAsyncFunction(defaultHooks.beforeQuery)) {
             yield defaultHooks.beforeQuery(options, context, req);
         }
         else {
@@ -1688,7 +1691,7 @@ const brewAzureFuncFindAll = (Model, hooks = {}, connector = "sequelize", sequel
         const defaultBody = Object.assign({ code: 200, message: "Data fetched successful.", data,
             total }, pagination);
         context.res = {
-            body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            body: isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, context, req)
                 : defaultHooks.beforeResponse(defaultBody, context, req),
         };
@@ -1698,7 +1701,7 @@ exports.brewAzureFuncFindAll = brewAzureFuncFindAll;
 const brewExpressFuncFindAll = (Model, hooks = {}, connector = "sequelize", sequelize = null, searchColumns = []) => {
     const defaultHooks = Object.assign({ beforeFind: (req, res) => { }, beforeResponse: (defaultBody, req, res) => defaultBody, beforeQuery: (defaultOptions, req, res) => { } }, hooks);
     return (0, exports.brewBlankExpressFunc)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+        if (isAsyncFunction(defaultHooks.beforeFind)) {
             yield defaultHooks.beforeFind(req, res);
         }
         else {
@@ -1716,7 +1719,7 @@ const brewExpressFuncFindAll = (Model, hooks = {}, connector = "sequelize", sequ
         else if (connector == "mongoose") {
             options = where;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+        if (isAsyncFunction(defaultHooks.beforeQuery)) {
             yield defaultHooks.beforeQuery(options, req, res);
         }
         else {
@@ -1814,7 +1817,7 @@ const brewExpressFuncFindAll = (Model, hooks = {}, connector = "sequelize", sequ
         }
         const defaultBody = Object.assign({ code: 200, message: "Data fetched successful.", data,
             total }, pagination);
-        res.json((0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+        res.json(isAsyncFunction(defaultHooks.beforeResponse)
             ? yield defaultHooks.beforeResponse(defaultBody, req, res)
             : defaultHooks.beforeResponse(defaultBody, req, res));
     }));
@@ -1823,7 +1826,7 @@ exports.brewExpressFuncFindAll = brewExpressFuncFindAll;
 const brewLambdaFuncFindAll = (Model, hooks = {}, connector = "sequelize", sequelize = null, searchColumns = []) => {
     const defaultHooks = Object.assign({ beforeFind: (event) => { }, beforeResponse: (defaultBody, event) => defaultBody, beforeQuery: (defaultOptions, event) => { } }, hooks);
     return (0, exports.brewBlankLambdaFunc)((event) => __awaiter(void 0, void 0, void 0, function* () {
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+        if (isAsyncFunction(defaultHooks.beforeFind)) {
             yield defaultHooks.beforeFind(event);
         }
         else {
@@ -1841,7 +1844,7 @@ const brewLambdaFuncFindAll = (Model, hooks = {}, connector = "sequelize", seque
         else if (connector == "mongoose") {
             options = where;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+        if (isAsyncFunction(defaultHooks.beforeQuery)) {
             yield defaultHooks.beforeQuery(options, event);
         }
         else {
@@ -1950,7 +1953,7 @@ const brewLambdaFuncFindAll = (Model, hooks = {}, connector = "sequelize", seque
         }
         const defaultBody = Object.assign({ code: 200, message: "Data fetched successful.", data,
             total }, pagination);
-        return (0, exports.createLambdaResponse)(200, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+        return (0, exports.createLambdaResponse)(200, isAsyncFunction(defaultHooks.beforeResponse)
             ? yield defaultHooks.beforeResponse(defaultBody, event)
             : defaultHooks.beforeResponse(defaultBody, event));
     }));
@@ -1960,7 +1963,7 @@ const brewAzureFuncFindOne = (Model, hooks = {}, message = "Data not found!", co
     const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody, ctx, req) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { } }, hooks);
     return (0, exports.brewBlankAzureFunc)((context, req) => __awaiter(void 0, void 0, void 0, function* () {
         context.log("HTTP trigger function processed a request.");
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+        if (isAsyncFunction(defaultHooks.beforeFind)) {
             yield defaultHooks.beforeFind(context, req);
         }
         else {
@@ -1977,7 +1980,7 @@ const brewAzureFuncFindOne = (Model, hooks = {}, message = "Data not found!", co
         else if (connector == "mongoose") {
             options = where;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+        if (isAsyncFunction(defaultHooks.beforeQuery)) {
             yield defaultHooks.beforeQuery(options, context, req);
         }
         else {
@@ -2025,7 +2028,7 @@ const brewAzureFuncFindOne = (Model, hooks = {}, message = "Data not found!", co
             data,
         };
         context.res = {
-            body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            body: isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, context, req)
                 : defaultHooks.beforeResponse(defaultBody, context, req),
         };
@@ -2035,7 +2038,7 @@ exports.brewAzureFuncFindOne = brewAzureFuncFindOne;
 const brewExpressFuncFindOne = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
     const defaultHooks = Object.assign({ beforeFind: (req, res) => { }, beforeResponse: (defaultBody, req, res) => defaultBody, beforeQuery: (defaultOptions, req, res) => { } }, hooks);
     return (0, exports.brewBlankExpressFunc)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+        if (isAsyncFunction(defaultHooks.beforeFind)) {
             yield defaultHooks.beforeFind(req, res);
         }
         else {
@@ -2052,7 +2055,7 @@ const brewExpressFuncFindOne = (Model, hooks = {}, message = "Data not found!", 
         else if (connector == "mongoose") {
             options = where;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+        if (isAsyncFunction(defaultHooks.beforeQuery)) {
             yield defaultHooks.beforeQuery(options, req, res);
         }
         else {
@@ -2101,7 +2104,7 @@ const brewExpressFuncFindOne = (Model, hooks = {}, message = "Data not found!", 
             message: "Data fetched successful.",
             data,
         };
-        res.json((0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+        res.json(isAsyncFunction(defaultHooks.beforeResponse)
             ? yield defaultHooks.beforeResponse(defaultBody, req, res)
             : defaultHooks.beforeResponse(defaultBody, req, res));
     }));
@@ -2110,7 +2113,7 @@ exports.brewExpressFuncFindOne = brewExpressFuncFindOne;
 const brewLambdaFuncFindOne = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
     const defaultHooks = Object.assign({ beforeFind: (event) => { }, beforeResponse: (defaultBody, event) => defaultBody, beforeQuery: (defaultOptions, event) => { } }, hooks);
     return (0, exports.brewBlankLambdaFunc)((event) => __awaiter(void 0, void 0, void 0, function* () {
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+        if (isAsyncFunction(defaultHooks.beforeFind)) {
             yield defaultHooks.beforeFind(event);
         }
         else {
@@ -2127,7 +2130,7 @@ const brewLambdaFuncFindOne = (Model, hooks = {}, message = "Data not found!", c
         else if (connector == "mongoose") {
             options = where;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+        if (isAsyncFunction(defaultHooks.beforeQuery)) {
             yield defaultHooks.beforeQuery(options, event);
         }
         else {
@@ -2180,7 +2183,7 @@ const brewLambdaFuncFindOne = (Model, hooks = {}, message = "Data not found!", c
             message: "Data fetched successful.",
             data,
         };
-        return (0, exports.createLambdaResponse)(200, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+        return (0, exports.createLambdaResponse)(200, isAsyncFunction(defaultHooks.beforeResponse)
             ? yield defaultHooks.beforeResponse(defaultBody, event)
             : defaultHooks.beforeResponse(defaultBody, event));
     }));
@@ -2190,7 +2193,7 @@ const brewAzureFuncUpdate = (Model, hooks = {}, message = "Data not found!", con
     const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody, ctx, req) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { }, beforeUpdate: (data, ctx, req) => { }, afterUpdate: (data, ctx, req) => { } }, hooks);
     return (0, exports.brewBlankAzureFunc)((context, req) => __awaiter(void 0, void 0, void 0, function* () {
         context.log("HTTP trigger function processed a request.");
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+        if (isAsyncFunction(defaultHooks.beforeFind)) {
             yield defaultHooks.beforeFind(context, req);
         }
         else {
@@ -2207,7 +2210,7 @@ const brewAzureFuncUpdate = (Model, hooks = {}, message = "Data not found!", con
         else if (connector == "mongoose") {
             options = where;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+        if (isAsyncFunction(defaultHooks.beforeQuery)) {
             yield defaultHooks.beforeQuery(options, context, req);
         }
         else {
@@ -2249,7 +2252,7 @@ const brewAzureFuncUpdate = (Model, hooks = {}, message = "Data not found!", con
             };
             throw error;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeUpdate)) {
+        if (isAsyncFunction(defaultHooks.beforeUpdate)) {
             yield defaultHooks.beforeUpdate(data, context, req);
         }
         else {
@@ -2259,7 +2262,7 @@ const brewAzureFuncUpdate = (Model, hooks = {}, message = "Data not found!", con
             data[k] = v;
         }
         yield data.save();
-        if ((0, types_1.isAsyncFunction)(defaultHooks.afterUpdate)) {
+        if (isAsyncFunction(defaultHooks.afterUpdate)) {
             yield defaultHooks.afterUpdate(data, context, req);
         }
         else {
@@ -2271,7 +2274,7 @@ const brewAzureFuncUpdate = (Model, hooks = {}, message = "Data not found!", con
             data,
         };
         context.res = {
-            body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            body: isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, context, req)
                 : defaultHooks.beforeResponse(defaultBody, context, req),
         };
@@ -2281,7 +2284,7 @@ exports.brewAzureFuncUpdate = brewAzureFuncUpdate;
 const brewExpressFuncUpdate = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
     const defaultHooks = Object.assign({ beforeFind: (req, res) => { }, beforeResponse: (defaultBody, req, res) => defaultBody, beforeQuery: (defaultOptions, req, res) => { }, beforeUpdate: (data, req, res) => { }, afterUpdate: (data, req, res) => { } }, hooks);
     return (0, exports.brewBlankExpressFunc)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+        if (isAsyncFunction(defaultHooks.beforeFind)) {
             yield defaultHooks.beforeFind(req, res);
         }
         else {
@@ -2298,7 +2301,7 @@ const brewExpressFuncUpdate = (Model, hooks = {}, message = "Data not found!", c
         else if (connector == "mongoose") {
             options = where;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+        if (isAsyncFunction(defaultHooks.beforeQuery)) {
             yield defaultHooks.beforeQuery(options, req, res);
         }
         else {
@@ -2342,7 +2345,7 @@ const brewExpressFuncUpdate = (Model, hooks = {}, message = "Data not found!", c
             };
             throw error;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeUpdate)) {
+        if (isAsyncFunction(defaultHooks.beforeUpdate)) {
             yield defaultHooks.beforeUpdate(data, req, res);
         }
         else {
@@ -2352,7 +2355,7 @@ const brewExpressFuncUpdate = (Model, hooks = {}, message = "Data not found!", c
             data[k] = v;
         }
         yield data.save();
-        if ((0, types_1.isAsyncFunction)(defaultHooks.afterUpdate)) {
+        if (isAsyncFunction(defaultHooks.afterUpdate)) {
             yield defaultHooks.afterUpdate(data, req, res);
         }
         else {
@@ -2363,7 +2366,7 @@ const brewExpressFuncUpdate = (Model, hooks = {}, message = "Data not found!", c
             message: "Data updated successful.",
             data,
         };
-        res.json((0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+        res.json(isAsyncFunction(defaultHooks.beforeResponse)
             ? yield defaultHooks.beforeResponse(defaultBody, req, res)
             : defaultHooks.beforeResponse(defaultBody, req, res));
     }));
@@ -2372,7 +2375,7 @@ exports.brewExpressFuncUpdate = brewExpressFuncUpdate;
 const brewLambdaFuncUpdate = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
     const defaultHooks = Object.assign({ beforeFind: (event) => { }, beforeResponse: (defaultBody, event) => defaultBody, beforeQuery: (defaultOptions, event) => { }, beforeUpdate: (data, event) => { }, afterUpdate: (data, event) => { } }, hooks);
     return (0, exports.brewBlankLambdaFunc)((event) => __awaiter(void 0, void 0, void 0, function* () {
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+        if (isAsyncFunction(defaultHooks.beforeFind)) {
             yield defaultHooks.beforeFind(event);
         }
         else {
@@ -2389,7 +2392,7 @@ const brewLambdaFuncUpdate = (Model, hooks = {}, message = "Data not found!", co
         else if (connector == "mongoose") {
             options = where;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+        if (isAsyncFunction(defaultHooks.beforeQuery)) {
             yield defaultHooks.beforeQuery(options, event);
         }
         else {
@@ -2437,7 +2440,7 @@ const brewLambdaFuncUpdate = (Model, hooks = {}, message = "Data not found!", co
             };
             throw error;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeUpdate)) {
+        if (isAsyncFunction(defaultHooks.beforeUpdate)) {
             yield defaultHooks.beforeUpdate(data, event);
         }
         else {
@@ -2447,7 +2450,7 @@ const brewLambdaFuncUpdate = (Model, hooks = {}, message = "Data not found!", co
             data[k] = v;
         }
         yield data.save();
-        if ((0, types_1.isAsyncFunction)(defaultHooks.afterUpdate)) {
+        if (isAsyncFunction(defaultHooks.afterUpdate)) {
             yield defaultHooks.afterUpdate(data, event);
         }
         else {
@@ -2458,7 +2461,7 @@ const brewLambdaFuncUpdate = (Model, hooks = {}, message = "Data not found!", co
             message: "Data updated successful.",
             data,
         };
-        return (0, exports.createLambdaResponse)(200, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+        return (0, exports.createLambdaResponse)(200, isAsyncFunction(defaultHooks.beforeResponse)
             ? yield defaultHooks.beforeResponse(defaultBody, event)
             : defaultHooks.beforeResponse(defaultBody, event));
     }));
@@ -2468,7 +2471,7 @@ const brewAzureFuncDelete = (Model, hooks = {}, message = "Data not found!", con
     const defaultHooks = Object.assign({ beforeFind: (ctx, req) => { }, beforeResponse: (defaultBody, ctx, req) => defaultBody, beforeQuery: (defaultOptions, ctx, req) => { }, beforeDelete: (data, ctx, req) => { }, afterDelete: (ctx, req) => { } }, hooks);
     return (0, exports.brewBlankAzureFunc)((context, req) => __awaiter(void 0, void 0, void 0, function* () {
         context.log("HTTP trigger function processed a request.");
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+        if (isAsyncFunction(defaultHooks.beforeFind)) {
             yield defaultHooks.beforeFind(context, req);
         }
         else {
@@ -2485,7 +2488,7 @@ const brewAzureFuncDelete = (Model, hooks = {}, message = "Data not found!", con
         else if (connector == "mongoose") {
             options = where;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+        if (isAsyncFunction(defaultHooks.beforeQuery)) {
             yield defaultHooks.beforeQuery(options, context, req);
         }
         else {
@@ -2527,7 +2530,7 @@ const brewAzureFuncDelete = (Model, hooks = {}, message = "Data not found!", con
             };
             throw error;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeDelete)) {
+        if (isAsyncFunction(defaultHooks.beforeDelete)) {
             yield defaultHooks.beforeDelete(data, context, req);
         }
         else {
@@ -2539,7 +2542,7 @@ const brewAzureFuncDelete = (Model, hooks = {}, message = "Data not found!", con
         else if (connector == "mongoose") {
             yield data.remove();
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.afterDelete)) {
+        if (isAsyncFunction(defaultHooks.afterDelete)) {
             yield defaultHooks.afterDelete(context, req);
         }
         else {
@@ -2550,7 +2553,7 @@ const brewAzureFuncDelete = (Model, hooks = {}, message = "Data not found!", con
             message: "Data deleted successful.",
         };
         context.res = {
-            body: (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            body: isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, context, req)
                 : defaultHooks.beforeResponse(defaultBody, context, req),
         };
@@ -2560,7 +2563,7 @@ exports.brewAzureFuncDelete = brewAzureFuncDelete;
 const brewExpressFuncDelete = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
     const defaultHooks = Object.assign({ beforeFind: (req, res) => { }, beforeResponse: (defaultBody, req, res) => defaultBody, beforeQuery: (defaultOptions, req, res) => { }, beforeDelete: (data, req, res) => { }, afterDelete: (req, res) => { } }, hooks);
     return (0, exports.brewBlankExpressFunc)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+        if (isAsyncFunction(defaultHooks.beforeFind)) {
             yield defaultHooks.beforeFind(req, res);
         }
         else {
@@ -2577,7 +2580,7 @@ const brewExpressFuncDelete = (Model, hooks = {}, message = "Data not found!", c
         else if (connector == "mongoose") {
             options = where;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+        if (isAsyncFunction(defaultHooks.beforeQuery)) {
             yield defaultHooks.beforeQuery(options, req, res);
         }
         else {
@@ -2621,7 +2624,7 @@ const brewExpressFuncDelete = (Model, hooks = {}, message = "Data not found!", c
             };
             throw error;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeDelete)) {
+        if (isAsyncFunction(defaultHooks.beforeDelete)) {
             yield defaultHooks.beforeDelete(data, req, res);
         }
         else {
@@ -2633,7 +2636,7 @@ const brewExpressFuncDelete = (Model, hooks = {}, message = "Data not found!", c
         else if (connector == "mongoose") {
             yield data.remove();
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.afterDelete)) {
+        if (isAsyncFunction(defaultHooks.afterDelete)) {
             yield defaultHooks.afterDelete(req, res);
         }
         else {
@@ -2643,7 +2646,7 @@ const brewExpressFuncDelete = (Model, hooks = {}, message = "Data not found!", c
             code: 204,
             message: "Data deleted successful.",
         };
-        res.json((0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+        res.json(isAsyncFunction(defaultHooks.beforeResponse)
             ? yield defaultHooks.beforeResponse(defaultBody, req, res)
             : defaultHooks.beforeResponse(defaultBody, req, res));
     }));
@@ -2652,7 +2655,7 @@ exports.brewExpressFuncDelete = brewExpressFuncDelete;
 const brewLambdaFuncDelete = (Model, hooks = {}, message = "Data not found!", connector = "sequelize") => {
     const defaultHooks = Object.assign({ beforeFind: (event) => { }, beforeResponse: (defaultBody, event) => defaultBody, beforeQuery: (defaultOptions, event) => { }, beforeDelete: (data, event) => { }, afterDelete: (event) => { } }, hooks);
     return (0, exports.brewBlankLambdaFunc)((event) => __awaiter(void 0, void 0, void 0, function* () {
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+        if (isAsyncFunction(defaultHooks.beforeFind)) {
             yield defaultHooks.beforeFind(event);
         }
         else {
@@ -2669,7 +2672,7 @@ const brewLambdaFuncDelete = (Model, hooks = {}, message = "Data not found!", co
         else if (connector == "mongoose") {
             options = where;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+        if (isAsyncFunction(defaultHooks.beforeQuery)) {
             yield defaultHooks.beforeQuery(options, event);
         }
         else {
@@ -2717,7 +2720,7 @@ const brewLambdaFuncDelete = (Model, hooks = {}, message = "Data not found!", co
             };
             throw error;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeDelete)) {
+        if (isAsyncFunction(defaultHooks.beforeDelete)) {
             yield defaultHooks.beforeDelete(data, event);
         }
         else {
@@ -2729,7 +2732,7 @@ const brewLambdaFuncDelete = (Model, hooks = {}, message = "Data not found!", co
         else if (connector == "mongoose") {
             yield data.remove();
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.afterDelete)) {
+        if (isAsyncFunction(defaultHooks.afterDelete)) {
             yield defaultHooks.afterDelete(event);
         }
         else {
@@ -2739,7 +2742,7 @@ const brewLambdaFuncDelete = (Model, hooks = {}, message = "Data not found!", co
             code: 204,
             message: "Data deleted successful.",
         };
-        return (0, exports.createLambdaResponse)(204, (0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+        return (0, exports.createLambdaResponse)(204, isAsyncFunction(defaultHooks.beforeResponse)
             ? yield defaultHooks.beforeResponse(defaultBody, event)
             : defaultHooks.beforeResponse(defaultBody, event));
     }));
@@ -2748,7 +2751,7 @@ exports.brewLambdaFuncDelete = brewLambdaFuncDelete;
 const brewExpressFuncCreateOrFindAll = (Model, hooks = {}, connector = "sequelize", sequelize = null, searchColumns = []) => {
     const defaultHooks = Object.assign({ beforeCreate: (req, res) => { }, afterCreate: (data, req, res) => { }, beforeResponse: (defaultBody) => defaultBody, beforeFind: (req, res) => { }, beforeQuery: (defaultOptions, req, res) => { }, afterFunctionStart: (req, res) => { } }, hooks);
     return (0, exports.brewBlankExpressFunc)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        if ((0, types_1.isAsyncFunction)(defaultHooks.afterFunctionStart)) {
+        if (isAsyncFunction(defaultHooks.afterFunctionStart)) {
             yield defaultHooks.afterFunctionStart(req, res);
         }
         else {
@@ -2756,7 +2759,7 @@ const brewExpressFuncCreateOrFindAll = (Model, hooks = {}, connector = "sequeliz
         }
         const method = req.method.toLowerCase();
         if (method == "get") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+            if (isAsyncFunction(defaultHooks.beforeFind)) {
                 yield defaultHooks.beforeFind(req, res);
             }
             else {
@@ -2774,7 +2777,7 @@ const brewExpressFuncCreateOrFindAll = (Model, hooks = {}, connector = "sequeliz
             else if (connector == "mongoose") {
                 options = where;
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+            if (isAsyncFunction(defaultHooks.beforeQuery)) {
                 yield defaultHooks.beforeQuery(options, req, res);
             }
             else {
@@ -2879,12 +2882,12 @@ const brewExpressFuncCreateOrFindAll = (Model, hooks = {}, connector = "sequeliz
             }
             const defaultBody = Object.assign({ code: 200, message: "Data fetched successful.", data,
                 total }, pagination);
-            res.json((0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            res.json(isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, req, res)
                 : defaultHooks.beforeResponse(defaultBody, req, res));
         }
         else if (method == "post") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeCreate)) {
+            if (isAsyncFunction(defaultHooks.beforeCreate)) {
                 yield defaultHooks.beforeCreate(req, res);
             }
             else {
@@ -2898,7 +2901,7 @@ const brewExpressFuncCreateOrFindAll = (Model, hooks = {}, connector = "sequeliz
                 data = new Model(req.body);
                 yield data.save();
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.afterCreate)) {
+            if (isAsyncFunction(defaultHooks.afterCreate)) {
                 yield defaultHooks.afterCreate(data, req, res);
             }
             else {
@@ -2911,7 +2914,7 @@ const brewExpressFuncCreateOrFindAll = (Model, hooks = {}, connector = "sequeliz
             };
             res
                 .status(201)
-                .json((0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+                .json(isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, req, res)
                 : defaultHooks.beforeResponse(defaultBody, req, res));
         }
@@ -2921,13 +2924,13 @@ exports.brewExpressFuncCreateOrFindAll = brewExpressFuncCreateOrFindAll;
 const brewExpressFuncFindOneOrUpdateOrDeleteByParam = (Model, hooks = {}, message = "Data not found!", paramKey = "", connector = "sequelize") => {
     const defaultHooks = Object.assign({ beforeFind: (req, res) => { }, beforeResponse: (defaultBody, req, res) => defaultBody, beforeQuery: (defaultOptions, req, res) => { }, beforeUpdate: (data, req, res) => { }, afterUpdate: (data, req, res) => { }, beforeDelete: (data, req, res) => { }, afterDelete: (req, res) => { }, afterFunctionStart: (req, res) => { } }, hooks);
     return (0, exports.brewBlankExpressFunc)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        if ((0, types_1.isAsyncFunction)(defaultHooks.afterFunctionStart)) {
+        if (isAsyncFunction(defaultHooks.afterFunctionStart)) {
             yield defaultHooks.afterFunctionStart(req, res);
         }
         else {
             defaultHooks.afterFunctionStart(req, res);
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeFind)) {
+        if (isAsyncFunction(defaultHooks.beforeFind)) {
             yield defaultHooks.beforeFind(req, res);
         }
         else {
@@ -2948,7 +2951,7 @@ const brewExpressFuncFindOneOrUpdateOrDeleteByParam = (Model, hooks = {}, messag
         else if (connector == "mongoose") {
             options = where;
         }
-        if ((0, types_1.isAsyncFunction)(defaultHooks.beforeQuery)) {
+        if (isAsyncFunction(defaultHooks.beforeQuery)) {
             yield defaultHooks.beforeQuery(options, req, res);
         }
         else {
@@ -2999,12 +3002,12 @@ const brewExpressFuncFindOneOrUpdateOrDeleteByParam = (Model, hooks = {}, messag
                 message: "Data fetched successful.",
                 data,
             };
-            res.json((0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            res.json(isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, req, res)
                 : defaultHooks.beforeResponse(defaultBody, req, res));
         }
         else if (method == "put" || method == "patch") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeUpdate)) {
+            if (isAsyncFunction(defaultHooks.beforeUpdate)) {
                 yield defaultHooks.beforeUpdate(data, req, res);
             }
             else {
@@ -3014,7 +3017,7 @@ const brewExpressFuncFindOneOrUpdateOrDeleteByParam = (Model, hooks = {}, messag
                 data[k] = v;
             }
             yield data.save();
-            if ((0, types_1.isAsyncFunction)(defaultHooks.afterUpdate)) {
+            if (isAsyncFunction(defaultHooks.afterUpdate)) {
                 yield defaultHooks.afterUpdate(data, req, res);
             }
             else {
@@ -3025,12 +3028,12 @@ const brewExpressFuncFindOneOrUpdateOrDeleteByParam = (Model, hooks = {}, messag
                 message: "Data updated successful.",
                 data,
             };
-            res.json((0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            res.json(isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, req, res)
                 : defaultHooks.beforeResponse(defaultBody, req, res));
         }
         else if (method == "delete") {
-            if ((0, types_1.isAsyncFunction)(defaultHooks.beforeDelete)) {
+            if (isAsyncFunction(defaultHooks.beforeDelete)) {
                 yield defaultHooks.beforeDelete(data, req, res);
             }
             else {
@@ -3042,7 +3045,7 @@ const brewExpressFuncFindOneOrUpdateOrDeleteByParam = (Model, hooks = {}, messag
             else if (connector == "mongoose") {
                 yield data.remove();
             }
-            if ((0, types_1.isAsyncFunction)(defaultHooks.afterDelete)) {
+            if (isAsyncFunction(defaultHooks.afterDelete)) {
                 yield defaultHooks.afterDelete(req, res);
             }
             else {
@@ -3052,7 +3055,7 @@ const brewExpressFuncFindOneOrUpdateOrDeleteByParam = (Model, hooks = {}, messag
                 code: 204,
                 message: "Data deleted successful.",
             };
-            res.json((0, types_1.isAsyncFunction)(defaultHooks.beforeResponse)
+            res.json(isAsyncFunction(defaultHooks.beforeResponse)
                 ? yield defaultHooks.beforeResponse(defaultBody, req, res)
                 : defaultHooks.beforeResponse(defaultBody, req, res));
         }

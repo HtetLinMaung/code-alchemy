@@ -1,7 +1,6 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { Request, Response } from "express";
-import { isAsyncFunction } from "util/types";
 import {
   AzureFuncHooks,
   AzureCreateHooks,
@@ -24,6 +23,11 @@ import {
 import isJson from "./utils/is-json";
 import log from "./utils/log";
 import queryToWhere from "./utils/query-to-where";
+
+const isAsyncFunction = (func: unknown) => {
+  const funcStr = func.toString();
+  return funcStr.includes("async") || funcStr.includes("__awaiter");
+};
 
 export const createLambdaResponse = (
   statusCode: number,
@@ -126,7 +130,7 @@ export const brewBlankExpressFunc = (
 ) => {
   return async (req: Request, res: Response) => {
     try {
-      if (isAsyncFunction(cb) || cb.toString().includes("__awaiter")) {
+      if (isAsyncFunction(cb)) {
         await cb(req, res);
       } else {
         cb(req, res);
@@ -142,7 +146,7 @@ export const brewBlankAzureFunc = (
 ) => {
   return (async (context: Context, req: HttpRequest): Promise<void> => {
     try {
-      if (isAsyncFunction(cb) || cb.toString().includes("__awaiter")) {
+      if (isAsyncFunction(cb)) {
         await cb(context, req);
       } else {
         cb(context, req);
@@ -160,7 +164,7 @@ export const brewBlankLambdaFunc = (
     event: APIGatewayProxyEvent
   ): Promise<APIGatewayProxyResult> => {
     try {
-      if (isAsyncFunction(cb) || cb.toString().includes("__awaiter")) {
+      if (isAsyncFunction(cb)) {
         return await cb(event);
       }
       return cb(event);
