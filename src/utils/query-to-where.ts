@@ -1,7 +1,7 @@
 import { DynamicObject } from "../interfaces";
 import isJson from "./is-json";
 
-export const convertFilterOperator = (filter: any, sequelize: any = null) => {
+export const convertFilterOperator = (filter: any, sequelize: any) => {
   if (Array.isArray(filter)) {
     return filter;
   }
@@ -12,7 +12,7 @@ export const convertFilterOperator = (filter: any, sequelize: any = null) => {
       key = sequelize.Op[k.replace("$", "")];
     }
     if (typeof v == "object" && !Array.isArray(v)) {
-      newFilter[key] = convertFilterOperator(v);
+      newFilter[key] = convertFilterOperator(v, sequelize);
     } else {
       newFilter[key] = v;
     }
@@ -58,7 +58,9 @@ const queryToWhere = (
       }
 
       if (connector == "sequelize") {
-        where[k] = isJson(v) ? convertFilterOperator(JSON.parse(v as any)) : v;
+        where[k] = isJson(v)
+          ? convertFilterOperator(JSON.parse(v as any), sequelize)
+          : v;
       } else {
         where[k] = isJson(v) ? JSON.parse(v as any) : v;
       }

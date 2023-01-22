@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.convertFilterOperator = void 0;
 const is_json_1 = __importDefault(require("./is-json"));
-const convertFilterOperator = (filter, sequelize = null) => {
+const convertFilterOperator = (filter, sequelize) => {
     if (Array.isArray(filter)) {
         return filter;
     }
@@ -16,7 +16,7 @@ const convertFilterOperator = (filter, sequelize = null) => {
             key = sequelize.Op[k.replace("$", "")];
         }
         if (typeof v == "object" && !Array.isArray(v)) {
-            newFilter[key] = (0, exports.convertFilterOperator)(v);
+            newFilter[key] = (0, exports.convertFilterOperator)(v, sequelize);
         }
         else {
             newFilter[key] = v;
@@ -57,7 +57,9 @@ const queryToWhere = (query, connector = "sequelize", sequelize = null, searchCo
                 where = {};
             }
             if (connector == "sequelize") {
-                where[k] = (0, is_json_1.default)(v) ? (0, exports.convertFilterOperator)(JSON.parse(v)) : v;
+                where[k] = (0, is_json_1.default)(v)
+                    ? (0, exports.convertFilterOperator)(JSON.parse(v), sequelize)
+                    : v;
             }
             else {
                 where[k] = (0, is_json_1.default)(v) ? JSON.parse(v) : v;
