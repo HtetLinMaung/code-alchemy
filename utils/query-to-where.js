@@ -6,6 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.convertFilterOperator = void 0;
 const is_json_1 = __importDefault(require("./is-json"));
 const convertFilterOperator = (filter, sequelize = null) => {
+    if (Array.isArray(filter)) {
+        return filter;
+    }
     const newFilter = {};
     for (const [k, v] of Object.entries(filter)) {
         let key = k;

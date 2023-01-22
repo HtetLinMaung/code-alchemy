@@ -12,9 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const query_to_where_1 = require("./utils/query-to-where");
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const results = (0, query_to_where_1.convertFilterOperator)({
-            $notBetween: [10, 20],
-        }, require("sequelize"));
+        const results = (0, query_to_where_1.convertFilterOperator)([["createdAt", "desc"]], require("sequelize"));
         console.log(results);
     });
 }

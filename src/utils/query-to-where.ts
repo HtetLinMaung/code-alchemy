@@ -2,6 +2,9 @@ import { DynamicObject } from "../interfaces";
 import isJson from "./is-json";
 
 export const convertFilterOperator = (filter: any, sequelize: any = null) => {
+  if (Array.isArray(filter)) {
+    return filter;
+  }
   const newFilter: any = {};
   for (const [k, v] of Object.entries(filter)) {
     let key = k;
