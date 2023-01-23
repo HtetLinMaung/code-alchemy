@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.brewExpressFuncFindOneOrUpdateOrDeleteByParam = exports.brewExpressFuncCreateOrFindAll = exports.brewLambdaFuncDelete = exports.brewExpressFuncDelete = exports.brewAzureFuncDelete = exports.brewLambdaFuncUpdate = exports.brewExpressFuncUpdate = exports.brewAzureFuncUpdate = exports.brewLambdaFuncFindOne = exports.brewExpressFuncFindOne = exports.brewAzureFuncFindOne = exports.brewLambdaFuncFindAll = exports.brewExpressFuncFindAll = exports.brewAzureFuncFindAll = exports.brewCrudLambdaFunc = exports.brewCrudExpressFunc = exports.brewCrudAzureFunc = exports.brewLambdaFuncCreate = exports.brewExpressFuncCreate = exports.brewAzureFuncCreate = exports.brewBlankLambdaFunc = exports.brewBlankAzureFunc = exports.brewBlankExpressFunc = exports.responseLambdaFuncError = exports.responseExpressFuncError = exports.responseAzureFuncError = exports.createLambdaResponse = void 0;
+exports.brewExpressFuncFindOneOrUpdateOrDeleteByParam = exports.brewExpressFuncCreateOrFindAll = exports.brewLambdaFuncDelete = exports.brewExpressFuncDelete = exports.brewAzureFuncDelete = exports.brewLambdaFuncUpdate = exports.brewExpressFuncUpdate = exports.brewAzureFuncUpdate = exports.brewLambdaFuncFindOne = exports.brewExpressFuncFindOne = exports.brewAzureFuncFindOne = exports.brewLambdaFuncFindAll = exports.brewExpressFuncFindAll = exports.brewAzureFuncFindAll = exports.brewCrudLambdaFunc = exports.brewCrudExpressFunc = exports.brewCrudAzureFunc = exports.brewLambdaFuncCreate = exports.brewExpressFuncCreate = exports.brewAzureFuncCreate = exports.brewBlankLambdaFunc = exports.brewBlankAzureFunc = exports.brewBlankExpressFunc = exports.responseLambdaFuncError = exports.responseExpressFuncError = exports.responseAzureFuncError = exports.createLambdaResponse = exports.throwErrorResponse = void 0;
 const is_json_1 = __importDefault(require("./utils/is-json"));
 const log_1 = __importDefault(require("./utils/log"));
 const query_to_where_1 = __importDefault(require("./utils/query-to-where"));
@@ -20,6 +20,16 @@ const isAsyncFunction = (func) => {
     const funcStr = func.toString();
     return funcStr.includes("async") || funcStr.includes("__awaiter");
 };
+const throwErrorResponse = (status, message) => {
+    const err = new Error(message);
+    err.status = status;
+    err.body = {
+        code: err.status,
+        message: err.message,
+    };
+    throw err;
+};
+exports.throwErrorResponse = throwErrorResponse;
 const createLambdaResponse = (statusCode, body = {}, headers = {}) => {
     return {
         statusCode: statusCode,

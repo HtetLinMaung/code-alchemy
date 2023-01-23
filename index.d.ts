@@ -2,6 +2,7 @@ import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { Request, Response } from "express";
 import { AzureCreateHooks, AzureDeleteHooks, AzureFindHooks, ParamsMap, AzureUpdateHooks, ExpressCreateHooks, ExpressFuncHooks, ExpressFindHooks, ExpressUpdateHooks, ExpressDeleteHooks, LambdaCreateHooks, LambdaFindHooks, LambdaUpdateHooks, LambdaDeleteHooks } from "./interfaces";
+export declare const throwErrorResponse: (status: number, message: string) => never;
 export declare const createLambdaResponse: (statusCode: number, body?: any, headers?: any) => {
     statusCode: number;
     headers: any;

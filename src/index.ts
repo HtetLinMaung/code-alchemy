@@ -29,6 +29,16 @@ const isAsyncFunction = (func: unknown) => {
   return funcStr.includes("async") || funcStr.includes("__awaiter");
 };
 
+export const throwErrorResponse = (status: number, message: string) => {
+  const err: any = new Error(message);
+  err.status = status;
+  err.body = {
+    code: err.status,
+    message: err.message,
+  };
+  throw err;
+};
+
 export const createLambdaResponse = (
   statusCode: number,
   body: any = {},
