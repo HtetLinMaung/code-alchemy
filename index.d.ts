@@ -1,7 +1,7 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { Request, Response } from "express";
-import { AzureCreateHooks, AzureDeleteHooks, AzureFindHooks, ParamsMap, AzureUpdateHooks, ExpressCreateHooks, ExpressFuncHooks, ExpressFindHooks, ExpressUpdateHooks, ExpressDeleteHooks, LambdaCreateHooks, LambdaFindHooks, LambdaUpdateHooks, LambdaDeleteHooks } from "./interfaces";
+import { AzureCreateHooks, AzureDeleteHooks, AzureFindHooks, ParamsMap, AzureUpdateHooks, ExpressCreateHooks, ExpressFuncHooks, ExpressFindHooks, ExpressUpdateHooks, ExpressDeleteHooks, LambdaCreateHooks, LambdaFindHooks, LambdaUpdateHooks, LambdaDeleteHooks, RawSqlEvents, RawSqlHooks } from "./interfaces";
 export declare const throwErrorResponse: (status: number, message: string) => never;
 export declare const createLambdaResponse: (statusCode: number, body?: any, headers?: any) => {
     statusCode: number;
@@ -34,3 +34,4 @@ export declare const brewExpressFuncDelete: (Model: any, hooks?: ExpressDeleteHo
 export declare const brewLambdaFuncDelete: (Model: any, hooks?: LambdaDeleteHooks, message?: string, connector?: string) => (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
 export declare const brewExpressFuncCreateOrFindAll: (Model: any, hooks?: ExpressFuncHooks, connector?: string, sequelize?: any, searchColumns?: string[]) => (req: Request, res: Response) => Promise<void>;
 export declare const brewExpressFuncFindOneOrUpdateOrDeleteByParam: (Model: any, hooks?: ExpressFuncHooks, message?: string, paramKey?: string, connector?: string) => (req: Request, res: Response) => Promise<void>;
+export declare const brewLambdaFuncRawSql: (sqllist: any[], sequelize: any, hooks?: RawSqlHooks, events?: RawSqlEvents) => Promise<(event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>>;

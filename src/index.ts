@@ -1,6 +1,7 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { Request, Response } from "express";
+import { asyncEach } from "starless-async";
 import {
   AzureFuncHooks,
   AzureCreateHooks,
@@ -19,6 +20,8 @@ import {
   LambdaFindHooks,
   LambdaUpdateHooks,
   LambdaDeleteHooks,
+  RawSqlEvents,
+  RawSqlHooks,
 } from "./interfaces";
 import isJson from "./utils/is-json";
 import log from "./utils/log";
@@ -3698,5 +3701,101 @@ export const brewExpressFuncFindOneOrUpdateOrDeleteByParam = (
           : defaultHooks.beforeResponse(defaultBody, req, res)
       );
     }
+  });
+};
+
+const replaceRawSql = (sql: string, query: any, body: any, state: any) => {
+  const bind = {};
+  for (const key in query) {
+    sql.replace(new RegExp(`$query.${key}`, "g"), `$query_${key}`);
+    bind[`query_${key}`] = query[key];
+  }
+  for (const key in body) {
+    sql.replace(new RegExp(`$body.${key}`, "g"), `$body_${key}`);
+    bind[`body_${key}`] = body[key];
+  }
+  for (const key in state) {
+    sql.replace(new RegExp(`$state.${key}`, "g"), `$state${key}`);
+    bind[`state_${key}`] = state[key];
+  }
+  return { sql, bind };
+};
+
+export const brewLambdaFuncRawSql = async (
+  sqllist: any[],
+  sequelize: any,
+  hooks: RawSqlHooks = {},
+  events: RawSqlEvents = {}
+) => {
+  return brewBlankLambdaFunc(async (event) => {
+    const defaultHooks: RawSqlHooks = {
+      afterFunctionStart(event) {},
+      beforeResponse(defaultBody, event) {
+        return defaultBody;
+      },
+      ...hooks,
+    };
+    if (isAsyncFunction(defaultHooks.afterFunctionStart)) {
+      await defaultHooks.afterFunctionStart(event);
+    } else {
+      defaultHooks.afterFunctionStart(event);
+    }
+
+    const query = event.queryStringParameters;
+    const body = event.body ? JSON.parse(event.body) : {};
+    const state: any = {
+      event,
+      query,
+      body,
+    };
+    let data = null;
+    await sequelize.transaction(async (t) => {
+      for (const [i, sqlOrList] of sqllist.entries()) {
+        if (Array.isArray(sqlOrList)) {
+          await asyncEach(sqlOrList, async (sqlstr, j) => {
+            const { sql, bind } = replaceRawSql(sqlstr, query, body, state);
+            data = await sequelize.query(sql, {
+              bind,
+              transaction: t,
+            });
+            state[`${i}_${j}`] = data;
+            if (typeof events[`${i}_${j}`] == "function") {
+              const eventCb = events[`@${i}_${j}`];
+              if (isAsyncFunction(eventCb)) {
+                await eventCb(data, state);
+              } else {
+                eventCb(data, state);
+              }
+            }
+          });
+        } else {
+          const { sql, bind } = replaceRawSql(sqlOrList, query, body, state);
+          data = await sequelize.query(sql, {
+            bind,
+            transaction: t,
+          });
+          state[`${i}_0`] = data;
+          if (typeof events[`@${i}_0`] == "function") {
+            const eventCb = events[`@${i}_0`];
+            if (isAsyncFunction(events[`@${i}_0`])) {
+              await eventCb(data, state);
+            } else {
+              eventCb(data, state);
+            }
+          }
+        }
+      }
+    });
+    let defaultBody: any = {
+      code: 200,
+      message: "Successful.",
+      data,
+    };
+    if (isAsyncFunction(defaultHooks.beforeResponse)) {
+      defaultBody = await defaultHooks.beforeResponse(defaultBody, event);
+    } else {
+      defaultBody = defaultHooks.beforeResponse(defaultBody, event);
+    }
+    return createLambdaResponse(200, defaultBody);
   });
 };
