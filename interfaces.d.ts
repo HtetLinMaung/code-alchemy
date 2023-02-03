@@ -131,5 +131,5 @@ export interface RawSqlEvents {
 }
 export interface RawSqlHooks {
     afterFunctionStart?: (event: APIGatewayProxyEvent) => Promise<void> | void;
-    beforeResponse?: (defaultBody: DynamicObject, event: APIGatewayProxyEvent) => DynamicObject;
+    beforeResponse?: (defaultBody: DynamicObject, event: APIGatewayProxyEvent, state: any) => DynamicObject;
 }

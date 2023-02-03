@@ -34,4 +34,4 @@ export declare const brewExpressFuncDelete: (Model: any, hooks?: ExpressDeleteHo
 export declare const brewLambdaFuncDelete: (Model: any, hooks?: LambdaDeleteHooks, message?: string, connector?: string) => (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
 export declare const brewExpressFuncCreateOrFindAll: (Model: any, hooks?: ExpressFuncHooks, connector?: string, sequelize?: any, searchColumns?: string[]) => (req: Request, res: Response) => Promise<void>;
 export declare const brewExpressFuncFindOneOrUpdateOrDeleteByParam: (Model: any, hooks?: ExpressFuncHooks, message?: string, paramKey?: string, connector?: string) => (req: Request, res: Response) => Promise<void>;
-export declare const brewLambdaFuncRawSql: (sqllist: any[], sequelize: any, hooks?: RawSqlHooks, events?: RawSqlEvents) => Promise<(event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>>;
+export declare const brewLambdaFuncRawSql: (sqllist: any[], sequelize: any, hooks?: RawSqlHooks, events?: RawSqlEvents) => (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;

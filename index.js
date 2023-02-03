@@ -3076,25 +3076,25 @@ exports.brewExpressFuncFindOneOrUpdateOrDeleteByParam = brewExpressFuncFindOneOr
 const replaceRawSql = (sql, query, body, state) => {
     const bind = {};
     for (const key in query) {
-        sql.replace(new RegExp(`$query.${key}`, "g"), `$query_${key}`);
+        sql = sql.replaceAll(`$query.${key}`, `$query_${key}`);
         bind[`query_${key}`] = query[key];
     }
     for (const key in body) {
-        sql.replace(new RegExp(`$body.${key}`, "g"), `$body_${key}`);
+        sql = sql.replaceAll(`$body.${key}`, `$body_${key}`);
         bind[`body_${key}`] = body[key];
     }
     for (const key in state) {
-        sql.replace(new RegExp(`$state.${key}`, "g"), `$state${key}`);
+        sql = sql.replaceAll(`$state.${key}`, `$state${key}`);
         bind[`state_${key}`] = state[key];
     }
-    return { sql, bind };
+    return { sql: sql, bind };
 };
-const brewLambdaFuncRawSql = (sqllist, sequelize, hooks = {}, events = {}) => __awaiter(void 0, void 0, void 0, function* () {
+const brewLambdaFuncRawSql = (sqllist, sequelize, hooks = {}, events = {}) => {
+    const defaultHooks = Object.assign({ afterFunctionStart(event) { },
+        beforeResponse(defaultBody, event, state) {
+            return defaultBody;
+        } }, hooks);
     return (0, exports.brewBlankLambdaFunc)((event) => __awaiter(void 0, void 0, void 0, function* () {
-        const defaultHooks = Object.assign({ afterFunctionStart(event) { },
-            beforeResponse(defaultBody, event) {
-                return defaultBody;
-            } }, hooks);
         if (isAsyncFunction(defaultHooks.afterFunctionStart)) {
             yield defaultHooks.afterFunctionStart(event);
         }
@@ -3155,12 +3155,12 @@ const brewLambdaFuncRawSql = (sqllist, sequelize, hooks = {}, events = {}) => __
             data,
         };
         if (isAsyncFunction(defaultHooks.beforeResponse)) {
-            defaultBody = yield defaultHooks.beforeResponse(defaultBody, event);
+            defaultBody = yield defaultHooks.beforeResponse(defaultBody, event, state);
         }
         else {
-            defaultBody = defaultHooks.beforeResponse(defaultBody, event);
+            defaultBody = defaultHooks.beforeResponse(defaultBody, event, state);
         }
         return (0, exports.createLambdaResponse)(200, defaultBody);
     }));
-});
+};
 exports.brewLambdaFuncRawSql = brewLambdaFuncRawSql;
