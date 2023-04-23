@@ -126,8 +126,12 @@ export interface LambdaDeleteHooks {
     afterDelete?: (event: APIGatewayProxyEvent) => Promise<void> | void;
     beforeQuery?: (options: DynamicObject, event: APIGatewayProxyEvent) => Promise<void> | void;
 }
+export interface RawSqlEventHooks {
+    beforeQuery?: (state: any) => boolean;
+    afterQuery?: (data: any, state: any) => void;
+}
 export interface RawSqlEvents {
-    [key: string]: any;
+    [key: string]: RawSqlEventHooks;
 }
 export interface RawSqlHooks {
     afterFunctionStart?: (event: APIGatewayProxyEvent) => Promise<void> | void;

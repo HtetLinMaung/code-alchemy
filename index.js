@@ -3114,36 +3114,58 @@ const brewLambdaFuncRawSql = (sqllist, sequelize, hooks = {}, events = {}) => {
                 if (Array.isArray(sqlOrList)) {
                     yield (0, starless_async_1.asyncEach)(sqlOrList, (sqlstr, j) => __awaiter(void 0, void 0, void 0, function* () {
                         const { sql, bind } = replaceRawSql(sqlstr, query, body, state);
-                        data = yield sequelize.query(sql, {
-                            bind,
-                            transaction: t,
-                        });
-                        state[`${i}_${j}`] = data;
-                        if (typeof events[`${i}_${j}`] == "function") {
-                            const eventCb = events[`@${i}_${j}`];
-                            if (isAsyncFunction(eventCb)) {
-                                yield eventCb(data, state);
+                        let isContinued = true;
+                        const dataEvent = events[`@${i}_${j}`];
+                        if (dataEvent && dataEvent.beforeQuery) {
+                            if (isAsyncFunction(dataEvent.beforeQuery)) {
+                                isContinued = yield dataEvent.beforeQuery(state);
                             }
                             else {
-                                eventCb(data, state);
+                                isContinued = dataEvent.beforeQuery(state);
+                            }
+                        }
+                        if (isContinued) {
+                            data = yield sequelize.query(sql, {
+                                bind,
+                                transaction: t,
+                            });
+                            state[`${i}_${j}`] = data;
+                            if (dataEvent && dataEvent.afterQuery) {
+                                if (isAsyncFunction(dataEvent.afterQuery)) {
+                                    yield dataEvent.afterQuery(data, state);
+                                }
+                                else {
+                                    dataEvent.afterQuery(data, state);
+                                }
                             }
                         }
                     }));
                 }
                 else {
                     const { sql, bind } = replaceRawSql(sqlOrList, query, body, state);
-                    data = yield sequelize.query(sql, {
-                        bind,
-                        transaction: t,
-                    });
-                    state[`${i}_0`] = data;
-                    if (typeof events[`@${i}_0`] == "function") {
-                        const eventCb = events[`@${i}_0`];
-                        if (isAsyncFunction(events[`@${i}_0`])) {
-                            yield eventCb(data, state);
+                    let isContinued = true;
+                    const dataEvent = events[`@${i}_0`];
+                    if (dataEvent && dataEvent.beforeQuery) {
+                        if (isAsyncFunction(dataEvent.beforeQuery)) {
+                            isContinued = yield dataEvent.beforeQuery(state);
                         }
                         else {
-                            eventCb(data, state);
+                            isContinued = dataEvent.beforeQuery(state);
+                        }
+                    }
+                    if (isContinued) {
+                        data = yield sequelize.query(sql, {
+                            bind,
+                            transaction: t,
+                        });
+                        state[`${i}_0`] = data;
+                        if (dataEvent && dataEvent.afterQuery) {
+                            if (isAsyncFunction(dataEvent.afterQuery)) {
+                                yield dataEvent.afterQuery(data, state);
+                            }
+                            else {
+                                dataEvent.afterQuery(data, state);
+                            }
                         }
                     }
                 }
